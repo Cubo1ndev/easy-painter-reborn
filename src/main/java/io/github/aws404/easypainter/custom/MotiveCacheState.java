@@ -147,7 +147,7 @@ public class MotiveCacheState extends PersistentState implements MotiveCacheStat
     }
 
     public static PersistentState.Type<MotiveCacheState> getPersistentStateType() {
-        return new PersistentState.Type<>(MotiveCacheState::new, MotiveCacheState::fromNbt, DataFixTypes.SAVED_DATA_MAP_DATA);
+        return new PersistentState.Type<>(MotiveCacheState::new, MotiveCacheState::fromNbt, null);
     }
 
     public static MotiveCacheState fromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
