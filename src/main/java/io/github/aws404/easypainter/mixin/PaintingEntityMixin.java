@@ -10,6 +10,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.decoration.AbstractDecorationEntity;
 import net.minecraft.entity.decoration.painting.PaintingEntity;
 import net.minecraft.entity.decoration.painting.PaintingVariant;
@@ -18,12 +19,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -37,12 +40,11 @@ public abstract class PaintingEntityMixin extends AbstractDecorationEntity {
 
 	@Shadow public abstract int getWidthPixels();
 	@Shadow public abstract int getHeightPixels();
-	@Unique public PaintingVariant motive;
+	@Final @Shadow private static TrackedData<RegistryEntry<PaintingVariant>> VARIANT;
 
-	@Unique
-	private boolean locked = false;
-	private CustomFrameEntity[] customPaintingFrames = new CustomFrameEntity[0];
-	private PaintingVariant cachedMotive;
+	@Unique private boolean locked = false;
+	@Unique private CustomFrameEntity[] customPaintingFrames = new CustomFrameEntity[0];
+	@Unique private TrackedData<RegistryEntry<PaintingVariant>> cachedMotive;
 
 	protected PaintingEntityMixin(EntityType<? extends AbstractDecorationEntity> entityType, World world) {
 		super(entityType, world);
@@ -58,7 +60,11 @@ public abstract class PaintingEntityMixin extends AbstractDecorationEntity {
 
 	@Override
 	public boolean canStayAttached() {
-		return this.locked || EasyPainter.canPaintingAttach((PaintingEntity) (Object) this, this.motive);
+        if (!this.locked) {
+			PaintingVariant variant = this.dataTracker.get(VARIANT).value();
+            EasyPainter.canPaintingAttach((PaintingEntity) (Object) this, variant);
+        }
+        return true;
 	}
 
 	@Override
@@ -79,19 +85,20 @@ public abstract class PaintingEntityMixin extends AbstractDecorationEntity {
 
 	@Override
 	public void tick() {
-		if (this.motive != this.cachedMotive) {
+		if (VARIANT != this.cachedMotive) {
 			for (CustomFrameEntity customPaintingFrame : this.customPaintingFrames) {
 				customPaintingFrame.remove(RemovalReason.DISCARDED);
 			}
 			this.customPaintingFrames = new CustomFrameEntity[0];
 		}
 
-		if (this.motive instanceof CustomMotivesManager.CustomMotive && this.motive != this.cachedMotive) {
-			MotiveCacheState.Entry state = ((CustomMotivesManager.CustomMotive) this.motive).state;
+		PaintingVariant variant = this.dataTracker.get(VARIANT).value();
+		if (variant instanceof CustomMotivesManager.CustomMotive && VARIANT != this.cachedMotive) {
+			MotiveCacheState.Entry state = ((CustomMotivesManager.CustomMotive) variant).state;
 			this.customPaintingFrames = new CustomFrameEntity[state.blockWidth * state.blockHeight];
 
-			int widthBlocks = motive.getWidth() / 16;
-			int heightBlocks = motive.getHeight() / 16;
+			int widthBlocks = variant.getWidth() / 16;
+			int heightBlocks = variant.getHeight() / 16;
 
 			int attachX = (widthBlocks - 1) / -2;
 			int attachY = (heightBlocks - 1) / -2;
@@ -103,7 +110,7 @@ public abstract class PaintingEntityMixin extends AbstractDecorationEntity {
 				for (int y = 0; y < heightBlocks; y++) {
 					BlockPos pos = new BlockPos.Mutable().set(this.attachmentPos).move(rotated, x + attachX).move(Direction.UP, (heightBlocks - y) + attachY - 1);
 
-					ItemStack stack = ((CustomMotivesManager.CustomMotive) this.motive).createMapItem(x, y);
+					ItemStack stack = ((CustomMotivesManager.CustomMotive) variant).createMapItem(x, y);
 
 					CustomFrameEntity entity = new CustomFrameEntity(this.getWorld(), (PaintingEntity) (Object) this, pos, stack);
 					this.getWorld().spawnEntity(entity);
@@ -113,7 +120,7 @@ public abstract class PaintingEntityMixin extends AbstractDecorationEntity {
 			}
 		}
 
-		this.cachedMotive = this.motive;
+		this.cachedMotive = VARIANT;
 		super.tick();
 	}
 
@@ -129,7 +136,8 @@ public abstract class PaintingEntityMixin extends AbstractDecorationEntity {
 
 	@Inject(method = "createSpawnPacket", at = @At("HEAD"), cancellable = true)
 	private void createSpawnPacket(CallbackInfoReturnable<Packet<?>> cir) {
-		if (this.motive instanceof CustomMotivesManager.CustomMotive) {
+		PaintingVariant variant = this.dataTracker.get(VARIANT).value();
+		if (variant instanceof CustomMotivesManager.CustomMotive) {
 			cir.setReturnValue(new EntitiesDestroyS2CPacket(this.getId()));
 		}
 	}

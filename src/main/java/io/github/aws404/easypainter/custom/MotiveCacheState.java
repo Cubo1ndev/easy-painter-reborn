@@ -33,7 +33,7 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 @Environment(EnvType.SERVER)
-public class MotiveCacheState extends PersistentState implements MotiveCacheStateInterface {
+public class MotiveCacheState extends PersistentState {
 
     private final HashMap<Identifier, Entry> entries;
     private final AtomicInteger currentMapId;
@@ -49,7 +49,7 @@ public class MotiveCacheState extends PersistentState implements MotiveCacheStat
     }
 
     @Override
-    public NbtCompound writeNbt(NbtCompound nbt) {
+    public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
         nbt.putInt("currentMapId", currentMapId.get());
         for (Entry entry : entries.values()) {
             if (entry != null)
@@ -156,11 +156,6 @@ public class MotiveCacheState extends PersistentState implements MotiveCacheStat
         HashMap<Identifier, Entry> entries = new HashMap<>();
         nbt.getKeys().stream().map(s -> Entry.fromNbt(nbt.getCompound(s))).forEach(entry -> entries.put(entry.id, entry));
         return new MotiveCacheState(entries, mapId);
-    }
-
-    @Override
-    public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        return null;
     }
 
     public static class Entry {

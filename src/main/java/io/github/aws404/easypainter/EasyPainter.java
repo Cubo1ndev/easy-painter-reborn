@@ -65,6 +65,8 @@ public class EasyPainter implements ModInitializer {
      * @return <code>true</code> if the motive will fit
      */
     public static boolean canPaintingAttach(PaintingEntity entity, PaintingVariant motive) {
+        System.out.println(entity);
+        System.out.println(motive);
         Direction facing = entity.getHorizontalFacing();
         Direction rotated = entity.getHorizontalFacing().rotateYCounterclockwise();
 
