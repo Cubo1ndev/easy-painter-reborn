@@ -5,8 +5,6 @@ import io.github.aws404.easypainter.SelectionGui;
 import io.github.aws404.easypainter.custom.CustomFrameEntity;
 import io.github.aws404.easypainter.custom.CustomMotivesManager;
 import io.github.aws404.easypainter.custom.MotiveCacheState;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.damage.DamageSource;

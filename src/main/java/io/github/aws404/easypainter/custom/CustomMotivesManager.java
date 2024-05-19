@@ -8,7 +8,6 @@ import net.minecraft.entity.decoration.painting.PaintingVariant;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtInt;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.resource.Resource;
@@ -17,8 +16,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.world.PersistentStateManager;
 
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -80,7 +77,7 @@ public class CustomMotivesManager {
                 compound = new NbtCompound();
             }
             compound.putInt("map", state.mapIds[x][y]);
-            nbt.set(DataComponentTypes.CUSTOM_DATA, map, compound);
+            NbtComponent.set(DataComponentTypes.CUSTOM_DATA, map, compound);
             //nbt.putInt("map", state.mapIds[x][y]);
             return map;
         }
