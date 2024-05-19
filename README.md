@@ -1,6 +1,10 @@
-# Easy Painter
+# Easy Painter Reborn
 
 **Easy painter** is a server-side mod for improving paintings!
+
+Original creator: [aws404](https://github.com/aws404)
+
+Original project: [Easy Painter](https://github.com/aws404/easy-painter)
 
 ## Features
 * Easy painting selection GUI opens when you place/shift click a painting, showing you all the paintings that could go in that position.
