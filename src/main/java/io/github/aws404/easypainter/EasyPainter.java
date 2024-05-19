@@ -12,6 +12,8 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.decoration.painting.PaintingEntity;
 import net.minecraft.entity.decoration.painting.PaintingVariant;
+import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.text.MutableText;
@@ -32,7 +34,7 @@ public class EasyPainter implements ModInitializer {
 	public static final Tag<Block> CANNOT_SUPPORT_PAINTING = TagRegistry.block(new Identifier("easy_painter:cannot_support_painting"));
 	public static final TagRegistration<EntityType<?>> PAINTING_INTERACT = TagRegTistry.entityType(new Identifier("easy_painter:painting_interact"));*/
 	public static final EntityType<CustomFrameEntity> CUSTOM_FRAME_ENTITY = registerEntity(CustomFrameEntity::new);
-    //public static final PaintingItem PAINTING_ITEM_OVERRIDE = Registry.register(Registries.ITEM, "painting", new PaintingItem(new Item.Settings()));
+    public static final PaintingItem PAINTING_ITEM_OVERRIDE = Registry.register(Registries.ITEM, Registries.ITEM.getId(Items.PAINTING), new PaintingItem(new Item.Settings()));
 
 	public static CustomMotivesManager customMotivesManager;
 
@@ -62,10 +64,10 @@ public class EasyPainter implements ModInitializer {
 
         int widthPixels = motive.getWidth();
         int heightPixels = motive.getHeight();
-        int widthBlocks = widthPixels / 16;
+        /*int widthBlocks = widthPixels / 16;
         int heightBlocks = heightPixels / 16;
 
-        /*int attachX = (widthBlocks - 1) / -2;
+        int attachX = (widthBlocks - 1) / -2;
         int attachY = (heightBlocks - 1) / -2;
 
         BlockPos.Mutable mutable = new BlockPos.Mutable();

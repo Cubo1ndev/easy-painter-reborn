@@ -7,7 +7,6 @@ import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.decoration.AbstractDecorationEntity;
 import net.minecraft.entity.decoration.painting.PaintingEntity;
-import net.minecraft.entity.decoration.painting.PaintingVariant;
 import net.minecraft.entity.decoration.painting.PaintingVariants;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.DecorationItem;
@@ -15,11 +14,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -48,8 +45,10 @@ public class PaintingItem extends DecorationItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);
         if (user.isSneaking()) {
+            System.out.println("1");
             Objects.requireNonNull(stack.get(DataComponentTypes.CUSTOM_DATA)).getNbt().putBoolean("EntityTag", false);
         } else if (stack.get(DataComponentTypes.CUSTOM_DATA) != null && Objects.requireNonNull(stack.get(DataComponentTypes.CUSTOM_DATA)).getNbt().getBoolean("EntityTag")) {
+            System.out.println("2");
             NbtCompound entityTag = Objects.requireNonNull(stack.get(DataComponentTypes.CUSTOM_DATA)).getNbt();
             Identifier current = Identifier.tryParse(entityTag.getString("Motive"));
             int newRaw = Registries.PAINTING_VARIANT.getRawId(Registries.PAINTING_VARIANT.get(current)) + 1;
@@ -59,6 +58,7 @@ public class PaintingItem extends DecorationItem {
 
             entityTag.putString("Motive", Registries.PAINTING_VARIANT.getId(Registries.PAINTING_VARIANT.get(newRaw)).toString());
         } else {
+            System.out.println("3");
             NbtCompound entityTag = Objects.requireNonNull(stack.get(DataComponentTypes.CUSTOM_DATA)).getNbt();
             entityTag.putString("Motive", Registries.PAINTING_VARIANT.getId(Registries.PAINTING_VARIANT.get(PaintingVariants.ALBAN.getRegistry())).toString());
         }
@@ -72,26 +72,33 @@ public class PaintingItem extends DecorationItem {
 
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
+        System.out.println("a");
         BlockPos blockPos = context.getBlockPos();
         Direction direction = context.getSide();
         BlockPos blockPos2 = blockPos.offset(direction);
         PlayerEntity playerEntity = context.getPlayer();
         ItemStack itemStack = context.getStack();
         if (playerEntity != null && !this.canPlaceOn(playerEntity, direction, itemStack, blockPos2)) {
+            System.out.println("b");
             return ActionResult.FAIL;
         } else {
+            System.out.println("c");
             World world = context.getWorld();
             PaintingEntity paintingEntity = new PaintingEntity(world, blockPos2, direction, Registries.PAINTING_VARIANT.getEntry(PaintingVariants.KEBAB.getRegistry()).get());
 
             NbtComponent nbtCompound = itemStack.get(DataComponentTypes.CUSTOM_DATA);
             if (nbtCompound != null) {
+                System.out.println("d");
                 EntityType.loadFromEntityNbt(world, playerEntity, paintingEntity, nbtCompound);
             } else {
+                System.out.println("e");
                 SelectionGui.createGui(paintingEntity, (ServerPlayerEntity) playerEntity).open();
             }
 
             if (paintingEntity.canStayAttached()) {
+                System.out.println("f");
                 if (!world.isClient) {
+                    System.out.println("g");
                     ((AbstractDecorationEntity)paintingEntity).onPlace();
                     world.emitGameEvent(playerEntity, GameEvent.ENTITY_PLACE, blockPos);
                     world.spawnEntity(paintingEntity);
@@ -100,6 +107,7 @@ public class PaintingItem extends DecorationItem {
                 itemStack.decrement(1);
                 return ActionResult.success(world.isClient);
             } else {
+                System.out.println("h");
                 assert playerEntity != null;
                 playerEntity.sendMessage(Text.translatable("message.easy_painter.painting_cant_fit").formatted(Formatting.RED), true);
                 return ActionResult.FAIL;

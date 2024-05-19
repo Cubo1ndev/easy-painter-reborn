@@ -41,10 +41,6 @@ public class CustomFrameEntity extends ItemFrameEntity {
         super(entityType, world);
     }
 
-    private CustomFrameEntity(World world) {
-        super(EasyPainter.CUSTOM_FRAME_ENTITY, world);
-    }
-
     @Override
     public int getWidthPixels() {
         return 16;

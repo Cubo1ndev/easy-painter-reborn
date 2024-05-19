@@ -3,10 +3,6 @@ package io.github.aws404.easypainter.custom;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.github.aws404.easypainter.EasyPainter;
-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.datafixer.DataFixTypes;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtIntArray;
@@ -15,24 +11,19 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
-import net.minecraft.world.ForcedChunkState;
 import net.minecraft.world.PersistentState;
 import net.minecraft.world.PersistentStateManager;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
 
-@Environment(EnvType.SERVER)
 public class MotiveCacheState extends PersistentState {
 
     private final HashMap<Identifier, Entry> entries;
@@ -64,10 +55,6 @@ public class MotiveCacheState extends PersistentState {
 
     public Set<Identifier> getKeys() {
         return this.entries.keySet();
-    }
-
-    public Entry getEntry(Identifier id) {
-        return this.entries.get(id);
     }
 
     /**
