@@ -1,7 +1,5 @@
 package io.github.aws404.easypainter;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.EntityType;
@@ -25,7 +23,6 @@ import net.minecraft.world.event.GameEvent;
 
 import java.util.Objects;
 
-@Environment(EnvType.SERVER)
 public class PaintingItem extends DecorationItem {
 
     public PaintingItem(Settings settings) {
