@@ -3,9 +3,12 @@ package io.github.aws404.easypainter.custom;
 import com.google.gson.Gson;
 import io.github.aws404.easypainter.EasyPainter;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.decoration.painting.PaintingVariant;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtInt;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.resource.Resource;
@@ -15,6 +18,7 @@ import net.minecraft.world.PersistentStateManager;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -67,7 +71,17 @@ public class CustomMotivesManager {
 
         public ItemStack createMapItem(int x, int y) {
             ItemStack map = new ItemStack(Items.FILLED_MAP);
-            map.get(DataComponentTypes.CUSTOM_DATA).getNbt().putInt("map", state.mapIds[x][y]);
+            NbtComponent nbt = map.get(DataComponentTypes.CUSTOM_DATA);
+            if (nbt == null) {
+                nbt = NbtComponent.of(new NbtCompound());
+            }
+            NbtCompound compound = nbt.getNbt();
+            if (compound == null) {
+                compound = new NbtCompound();
+            }
+            compound.putInt("map", state.mapIds[x][y]);
+            nbt.set(DataComponentTypes.CUSTOM_DATA, map, compound);
+            //nbt.putInt("map", state.mapIds[x][y]);
             return map;
         }
     }

@@ -33,7 +33,7 @@ public class CustomFrameEntity extends ItemFrameEntity {
     public CustomFrameEntity(World world, PaintingEntity painting, BlockPos pos, ItemStack stack) {
         super(EasyPainter.CUSTOM_FRAME_ENTITY, world, pos, painting.getHorizontalFacing());
         this.painting = painting;
-        this.motive = (CustomMotivesManager.CustomMotive) painting.getVariant();
+        this.motive = (CustomMotivesManager.CustomMotive) painting.getVariant().value();
         this.setHeldItemStack(stack);
     }
 
@@ -89,7 +89,7 @@ public class CustomFrameEntity extends ItemFrameEntity {
 
     @Override
     public Packet<ClientPlayPacketListener> createSpawnPacket() {
-        if (this.painting.getVariant() instanceof CustomMotivesManager.CustomMotive) {
+        if (this.painting.getVariant().value() instanceof CustomMotivesManager.CustomMotive) {
             return new EntitySpawnS2CPacket(this, 0, this.getDecorationBlockPos());
         }
         return new EntitiesDestroyS2CPacket(this.getId());
