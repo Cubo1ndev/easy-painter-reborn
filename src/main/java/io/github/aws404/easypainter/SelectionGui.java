@@ -2,7 +2,10 @@ package io.github.aws404.easypainter;
 
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
+import io.github.aws404.easypainter.custom.CustomMotivesManager;
+import io.github.aws404.easypainter.custom.MotiveCacheState;
 import io.github.aws404.easypainter.mixin.AbstractDecorationEntityAccessor;
+import io.github.aws404.easypainter.mixin.PaintingEntityMixinAccessor;
 import net.minecraft.entity.decoration.painting.PaintingEntity;
 import net.minecraft.entity.decoration.painting.PaintingVariant;
 import net.minecraft.item.Items;
@@ -14,12 +17,11 @@ import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SelectionGui extends SimpleGui {
 
@@ -31,8 +33,16 @@ public class SelectionGui extends SimpleGui {
         this.setTitle(Text.translatable("screen.easy_painter.title"));
 
         for (PaintingVariant possibility : motives) {
+            Identifier id = Registries.PAINTING_VARIANT.getId(possibility);
+            if (possibility instanceof CustomMotivesManager.CustomMotive) {
+                Identifier newId = EasyPainter.customMotivesManager.getMotiveId((CustomMotivesManager.CustomMotive) possibility);
+                if (newId != null) {
+                    id = newId;
+                }
+            }
+
             GuiElementBuilder builder = new GuiElementBuilder(Items.PAINTING)
-                    .setName(EasyPainter.getPaintingDisplayName(Registries.PAINTING_VARIANT.getId(possibility)).formatted(Formatting.YELLOW))
+                    .setName(EasyPainter.getPaintingDisplayName(id).formatted(Formatting.YELLOW))
                     .addLoreLine(Text.literal("")
                             .append(Text.translatable("screen.easy_painter.bullet").formatted(Formatting.GOLD))
                             .append(Text.translatable("screen.easy_painter.size",
@@ -55,10 +65,14 @@ public class SelectionGui extends SimpleGui {
     }
 
     private void changePainting(PaintingVariant motive) {
-        Optional<RegistryEntry.Reference<PaintingVariant>> variant = Registries.PAINTING_VARIANT.getEntry(Registries.PAINTING_VARIANT.getId(motive));
-        if (variant.isEmpty()) return;
+        if (motive instanceof CustomMotivesManager.CustomMotive) {
+            ((PaintingEntityMixinAccessor) this.entity).setCustomVariant((CustomMotivesManager.CustomMotive) motive);
+        } else {
+            Optional<RegistryEntry.Reference<PaintingVariant>> variant = Registries.PAINTING_VARIANT.getEntry(Registries.PAINTING_VARIANT.getId(motive));
+            if (variant.isEmpty()) return;
+            this.entity.setVariant(variant.get());
+        }
 
-        this.entity.setVariant(variant.get());
         ((AbstractDecorationEntityAccessor) this.entity).callUpdateAttachmentPosition();
         Objects.requireNonNull(this.entity.getServer()).getPlayerManager().sendToAll(new EntitiesDestroyS2CPacket(this.entity.getId()));
         Packet<?> packet = this.entity.createSpawnPacket();
@@ -68,7 +82,9 @@ public class SelectionGui extends SimpleGui {
     }
 
     public static SelectionGui createGui(PaintingEntity entity, ServerPlayerEntity player) {
-        List<PaintingVariant> motives = Registries.PAINTING_VARIANT.stream().filter(motive -> EasyPainter.canPaintingAttach(entity, motive)).sorted(Comparator.comparingInt(o -> o.getHeight() * o.getWidth())).collect(Collectors.toList());
+        List<PaintingVariant> motives1 = Registries.PAINTING_VARIANT.stream().filter(motive -> EasyPainter.canPaintingAttach(entity, motive)).sorted(Comparator.comparingInt(o -> o.getHeight() * o.getWidth())).collect(Collectors.toList());
+        List<CustomMotivesManager.CustomMotive> motives2 = new ArrayList<>(EasyPainter.customMotivesManager.getMotives().values());
+        List<PaintingVariant> motives = Stream.concat(motives1.stream(), motives2.stream()).toList();
         return new SelectionGui(entity, motives, player);
     }
 

@@ -24,6 +24,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -35,17 +36,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(PaintingEntity.class)
 public abstract class PaintingEntityMixin extends AbstractDecorationEntity {
-
 	@Shadow public abstract int getWidthPixels();
 	@Shadow public abstract int getHeightPixels();
 	@Final @Shadow private static TrackedData<RegistryEntry<PaintingVariant>> VARIANT;
 
 	@Unique private boolean locked = false;
 	@Unique private CustomFrameEntity[] customPaintingFrames = new CustomFrameEntity[0];
-	@Unique private TrackedData<RegistryEntry<PaintingVariant>> cachedMotive;
+	@Unique private CustomMotivesManager.CustomMotive cachedMotive;
+	@Unique @Nullable private CustomMotivesManager.CustomMotive CUSTOM_VARIANT;
 
 	protected PaintingEntityMixin(EntityType<? extends AbstractDecorationEntity> entityType, World world) {
 		super(entityType, world);
+		
 	}
 
 	@Override
@@ -83,20 +85,20 @@ public abstract class PaintingEntityMixin extends AbstractDecorationEntity {
 
 	@Override
 	public void tick() {
-		if (VARIANT != this.cachedMotive) {
+		if (CUSTOM_VARIANT != this.cachedMotive) {
 			for (CustomFrameEntity customPaintingFrame : this.customPaintingFrames) {
 				customPaintingFrame.remove(RemovalReason.DISCARDED);
 			}
 			this.customPaintingFrames = new CustomFrameEntity[0];
 		}
 
-		PaintingVariant variant = this.dataTracker.get(VARIANT).value();
-		if (variant instanceof CustomMotivesManager.CustomMotive && VARIANT != this.cachedMotive) {
-			MotiveCacheState.Entry state = ((CustomMotivesManager.CustomMotive) variant).state;
+		//PaintingVariant variant = this.dataTracker.get(VARIANT).value();
+		if (/*variant instanceof CustomMotivesManager.CustomMotive*/ CUSTOM_VARIANT != null && CUSTOM_VARIANT != this.cachedMotive) {
+			MotiveCacheState.Entry state = CUSTOM_VARIANT.state;
 			this.customPaintingFrames = new CustomFrameEntity[state.blockWidth * state.blockHeight];
 
-			int widthBlocks = variant.getWidth() / 16;
-			int heightBlocks = variant.getHeight() / 16;
+			int widthBlocks = CUSTOM_VARIANT.getWidth() / 16;
+			int heightBlocks = CUSTOM_VARIANT.getHeight() / 16;
 
 			int attachX = (widthBlocks - 1) / -2;
 			int attachY = (heightBlocks - 1) / -2;
@@ -108,7 +110,7 @@ public abstract class PaintingEntityMixin extends AbstractDecorationEntity {
 				for (int y = 0; y < heightBlocks; y++) {
 					BlockPos pos = new BlockPos.Mutable().set(this.attachmentPos).move(rotated, x + attachX).move(Direction.UP, (heightBlocks - y) + attachY - 1);
 
-					ItemStack stack = ((CustomMotivesManager.CustomMotive) variant).createMapItem(x, y);
+					ItemStack stack = CUSTOM_VARIANT.createMapItem(x, y);
 
 					CustomFrameEntity entity = new CustomFrameEntity(this.getWorld(), (PaintingEntity) (Object) this, pos, stack);
 					this.getWorld().spawnEntity(entity);
@@ -118,8 +120,18 @@ public abstract class PaintingEntityMixin extends AbstractDecorationEntity {
 			}
 		}
 
-		this.cachedMotive = VARIANT;
+		this.cachedMotive = CUSTOM_VARIANT;
 		super.tick();
+	}
+
+	@Unique
+	public CustomMotivesManager.CustomMotive getCustomVariant() {
+		return CUSTOM_VARIANT;
+	}
+
+	@Unique
+	public void getCustomVariant(CustomMotivesManager.CustomMotive variant) {
+		CUSTOM_VARIANT = variant;
 	}
 
 	@Inject(method = "readCustomDataFromNbt", at = @At("HEAD"))
@@ -134,8 +146,7 @@ public abstract class PaintingEntityMixin extends AbstractDecorationEntity {
 
 	@Inject(method = "createSpawnPacket", at = @At("HEAD"), cancellable = true)
 	private void createSpawnPacket(CallbackInfoReturnable<Packet<?>> cir) {
-		PaintingVariant variant = this.dataTracker.get(VARIANT).value();
-		if (variant instanceof CustomMotivesManager.CustomMotive) {
+		if (CUSTOM_VARIANT != null) {
 			cir.setReturnValue(new EntitiesDestroyS2CPacket(this.getId()));
 		}
 	}

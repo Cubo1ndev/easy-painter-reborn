@@ -33,7 +33,7 @@ public class EasyPainter implements ModInitializer {
 	/*public static final Tag<Block> PAINTING_IGNORED = TagRegistry.block(new Identifier("easy_painter:painting_ignored"));
 	public static final Tag<Block> CANNOT_SUPPORT_PAINTING = TagRegistry.block(new Identifier("easy_painter:cannot_support_painting"));
 	public static final TagRegistration<EntityType<?>> PAINTING_INTERACT = TagRegTistry.entityType(new Identifier("easy_painter:painting_interact"));*/
-	public static final EntityType<CustomFrameEntity> CUSTOM_FRAME_ENTITY = registerEntity(CustomFrameEntity::new);
+	//public static final EntityType<CustomFrameEntity> CUSTOM_FRAME_ENTITY = registerEntity(CustomFrameEntity::new);
     //public static final PaintingItem PAINTING_ITEM_OVERRIDE = Registry.register(Registries.ITEM, Registries.ITEM.getId(Items.PAINTING), new PaintingItem(new Item.Settings()));
 
 	public static CustomMotivesManager customMotivesManager;

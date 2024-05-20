@@ -16,7 +16,10 @@ import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.PersistentStateManager;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -24,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class CustomMotivesManager {
 
     private static final Gson GSON = new Gson();
+    private static HashMap<Identifier, CustomMotive> motives = new HashMap<>();
 
     private final PersistentStateManager stateManager;
 
@@ -50,13 +54,34 @@ public class CustomMotivesManager {
     }
 
     private static void registerOrReplace(Identifier id, CustomMotive motive) {
-        if (Registries.PAINTING_VARIANT.containsId(id)) {
+        if (motives.containsKey(id)) {
             EasyPainter.LOGGER.info("Replacing painting motive '{}'. Note that removing motives at reload is not supported.", id);
-            Registry.register(Registries.PAINTING_VARIANT, id.toString(), motive);
+            //Registry.register(Registries.PAINTING_VARIANT, id.toString(), motive);
+            motives.put(id, motive);
             return;
         }
 
-        Registry.register(Registries.PAINTING_VARIANT, id, motive);
+        motives.put(id, motive);
+        //Registry.register(Registries.PAINTING_VARIANT, id, motive);
+    }
+
+    public HashMap<Identifier, CustomMotive> getMotives() {
+        return motives;
+    }
+
+    private <K, V> Set<K> getKeys(Map<K, V> map, V value) {
+        Set<K> keys = new HashSet<>();
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            if (entry.getValue().equals(value)) {
+                keys.add(entry.getKey());
+            }
+        }
+        return keys;
+    }
+
+    @Nullable
+    public Identifier getMotiveId(CustomMotive motive) {
+        return getKeys(motives, motive).stream().toList().getFirst();
     }
 
     public static class CustomMotive extends PaintingVariant {
