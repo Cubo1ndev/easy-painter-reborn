@@ -1,8 +1,7 @@
 package io.github.aws404.easypainter.custom;
 
 import io.github.aws404.easypainter.mixin.MapStateAccessor;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.minecraft.component.type.MapIdComponent;
 import net.minecraft.item.map.MapState;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.PersistentStateManager;
@@ -19,11 +18,10 @@ import java.util.Objects;
  * @author TheEssem
  * @see <a href="https://github.com/TheEssem/Image2Map/blob/master/src/main/java/space/essem/image2map/renderer/MapRenderer.java">Original Source</a>
  */
-@Environment(EnvType.SERVER)
 public class ImageRenderer {
     private static final double[] shadeCoeffs = {0.71, 0.86, 1.0, 0.53};
 
-    public static int renderImageToMap(BufferedImage image, DitherMode mode, PersistentStateManager stateManager) {
+    public static int renderImageToMap(World world, BufferedImage image, DitherMode mode, PersistentStateManager stateManager) {
         MapState state = MapState.of((byte) 3, false, World.OVERWORLD);
         ((MapStateAccessor) state).setLocked(true);
 
@@ -39,17 +37,18 @@ public class ImageRenderer {
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 imageColor = new Color(pixels[j][i], true);
-                if (mode.equals(DitherMode.FLOYD))
+                if (mode.equals(DitherMode.FLOYD)) {
                     state.colors[i + j * width] = (byte) floydDither(mapColors, pixels, i, j, imageColor);
-                else
+                } else {
                     state.colors[i + j * width] = (byte) nearestColor(mapColors, imageColor);
-                state.colors[i + j * width] = (byte) nearestColor(mapColors, imageColor);
+                }
             }
         }
 
-        int stateId = getNextPaintingId(stateManager);
-        stateManager.set("map_" + stateId, state);
-        return stateId;
+        MapIdComponent stateId = world.getNextMapId(); //getNextPaintingId(stateManager);
+        //stateManager.set("map_" + stateId, state);
+        world.putMapState(stateId, state);
+        return stateId.id();
     }
 
     private static double distance(double[] vectorA, double[] vectorB) {

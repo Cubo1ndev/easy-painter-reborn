@@ -47,7 +47,7 @@ public class EasyPainter implements ModInitializer {
         ServerWorldEvents.LOAD.register((server, world) -> {
             if (world.getRegistryKey() == World.OVERWORLD) {
                 EasyPainter.customMotivesManager = new CustomMotivesManager(world.getPersistentStateManager());
-                EasyPainter.customMotivesManager.reload(server.getResourceManager());
+                EasyPainter.customMotivesManager.reload(world, server.getResourceManager());
             }
         });
     }

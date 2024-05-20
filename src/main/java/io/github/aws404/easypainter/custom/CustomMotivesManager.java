@@ -3,6 +3,7 @@ package io.github.aws404.easypainter.custom;
 import com.google.gson.Gson;
 import io.github.aws404.easypainter.EasyPainter;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.MapIdComponent;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.decoration.painting.PaintingVariant;
 import net.minecraft.item.ItemStack;
@@ -14,6 +15,7 @@ import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.PersistentStateManager;
+import net.minecraft.world.World;
 
 import java.util.Map;
 import java.util.Set;
@@ -29,7 +31,7 @@ public class CustomMotivesManager {
         this.stateManager = stateManager;
     }
 
-    public void reload(ResourceManager manager) {
+    public void reload(World world, ResourceManager manager) {
         MotiveCacheState paintingStorage = MotiveCacheState.getOrCreate(this.stateManager);
 
         Map<Identifier, Resource> paintings =  manager.findResources("painting", s -> true);
@@ -37,7 +39,7 @@ public class CustomMotivesManager {
 
         AtomicInteger id = new AtomicInteger();
         keySet.stream().filter(identifier -> identifier.getPath().contains(".json")).forEach(identifier -> {
-            MotiveCacheState.Entry motiveCache = paintingStorage.getOrCreateEntry(identifier, GSON, manager, this.stateManager);
+            MotiveCacheState.Entry motiveCache = paintingStorage.getOrCreateEntry(world, identifier, GSON, manager, this.stateManager);
             CustomMotivesManager.registerOrReplace(motiveCache.getId(), new CustomMotive(motiveCache));
             id.incrementAndGet();
         });
@@ -68,17 +70,7 @@ public class CustomMotivesManager {
 
         public ItemStack createMapItem(int x, int y) {
             ItemStack map = new ItemStack(Items.FILLED_MAP);
-            NbtComponent nbt = map.get(DataComponentTypes.CUSTOM_DATA);
-            if (nbt == null) {
-                nbt = NbtComponent.of(new NbtCompound());
-            }
-            NbtCompound compound = nbt.getNbt();
-            if (compound == null) {
-                compound = new NbtCompound();
-            }
-            compound.putInt("map", state.mapIds[x][y]);
-            NbtComponent.set(DataComponentTypes.CUSTOM_DATA, map, compound);
-            //nbt.putInt("map", state.mapIds[x][y]);
+            map.set(DataComponentTypes.MAP_ID, new MapIdComponent(state.mapIds[x][y]));
             return map;
         }
     }

@@ -13,6 +13,7 @@ import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.PersistentState;
 import net.minecraft.world.PersistentStateManager;
+import net.minecraft.world.World;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -71,7 +72,7 @@ public class MotiveCacheState extends PersistentState {
         this.markDirty();
     }
 
-    public Entry getOrCreateEntry(Identifier resource, Gson gson, ResourceManager manager, PersistentStateManager stateManager) {
+    public Entry getOrCreateEntry(World world, Identifier resource, Gson gson, ResourceManager manager, PersistentStateManager stateManager) {
         Identifier motiveId = new Identifier(resource.getNamespace(), resource.getPath().substring(9, resource.getPath().indexOf(".json")));
 
         if (this.entries.containsKey(motiveId)) {
@@ -105,7 +106,7 @@ public class MotiveCacheState extends PersistentState {
                 for (int bH = 0; bH < blockHeight; bH++) {
                     BufferedImage outputImage = new BufferedImage(128, 128, BufferedImage.TYPE_INT_RGB);
                     outputImage.getGraphics().drawImage(resultingImage, 0, 0, 128, 128, bW * 128, bH * 128, (bW + 1) * 128, (bH + 1) * 128, null);
-                    mapIds[bW][bH] = ImageRenderer.renderImageToMap(outputImage, ditherMode, stateManager);
+                    mapIds[bW][bH] = ImageRenderer.renderImageToMap(world, outputImage, ditherMode, stateManager);
                 }
             }
 

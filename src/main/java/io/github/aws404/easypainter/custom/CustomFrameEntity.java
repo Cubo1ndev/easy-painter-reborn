@@ -1,8 +1,6 @@
 package io.github.aws404.easypainter.custom;
 
 import io.github.aws404.easypainter.EasyPainter;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
@@ -24,7 +22,6 @@ import org.jetbrains.annotations.Nullable;
 /**
  * This is the extension of ItemFrame used for custom painting motives
  */
-@Environment(EnvType.SERVER)
 public class CustomFrameEntity extends ItemFrameEntity {
 
     public PaintingEntity painting;
@@ -85,9 +82,11 @@ public class CustomFrameEntity extends ItemFrameEntity {
 
     @Override
     public Packet<ClientPlayPacketListener> createSpawnPacket() {
-        if (this.painting.getVariant().value() instanceof CustomMotivesManager.CustomMotive) {
+        /*if (this.painting.getVariant().value() instanceof CustomMotivesManager.CustomMotive) {
+            System.out.println(1);
             return new EntitySpawnS2CPacket(this, 0, this.getDecorationBlockPos());
-        }
+        }*/
+        System.out.println(2);
         return new EntitiesDestroyS2CPacket(this.getId());
     }
 
