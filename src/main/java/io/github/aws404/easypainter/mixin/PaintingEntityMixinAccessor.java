@@ -5,5 +5,5 @@ import io.github.aws404.easypainter.custom.CustomMotivesManager;
 public interface PaintingEntityMixinAccessor {
     CustomMotivesManager.CustomMotive getCustomVariant();
 
-    void setCustomVariant(CustomMotivesManager.CustomMotive variant);
+    void setCustomVariant(CustomMotivesManager.CustomMotive motive);
 }

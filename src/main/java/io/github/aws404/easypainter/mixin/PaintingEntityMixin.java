@@ -130,8 +130,8 @@ public abstract class PaintingEntityMixin extends AbstractDecorationEntity {
 	}
 
 	@Unique
-	public void getCustomVariant(CustomMotivesManager.CustomMotive variant) {
-		CUSTOM_VARIANT = variant;
+	public void setCustomVariant(CustomMotivesManager.CustomMotive motive) {
+		CUSTOM_VARIANT = motive;
 	}
 
 	@Inject(method = "readCustomDataFromNbt", at = @At("HEAD"))
