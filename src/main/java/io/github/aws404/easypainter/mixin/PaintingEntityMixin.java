@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(PaintingEntity.class)
-public abstract class PaintingEntityMixin extends AbstractDecorationEntity {
+public abstract class PaintingEntityMixin extends AbstractDecorationEntity implements PaintingEntityMixinAccessor {
 	@Shadow public abstract int getWidthPixels();
 	@Shadow public abstract int getHeightPixels();
 	@Final @Shadow private static TrackedData<RegistryEntry<PaintingVariant>> VARIANT;
@@ -124,13 +124,13 @@ public abstract class PaintingEntityMixin extends AbstractDecorationEntity {
 		super.tick();
 	}
 
-	@Unique
-	public CustomMotivesManager.CustomMotive getCustomVariant() {
+	@Override
+	public CustomMotivesManager.CustomMotive easy_painter_master$getCustomVariant() {
 		return CUSTOM_VARIANT;
 	}
 
-	@Unique
-	public void setCustomVariant(CustomMotivesManager.CustomMotive motive) {
+	@Override
+	public void easy_painter_master$setCustomVariant(CustomMotivesManager.CustomMotive motive) {
 		CUSTOM_VARIANT = motive;
 	}
 

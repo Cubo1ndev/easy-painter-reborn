@@ -1,10 +1,7 @@
 package io.github.aws404.easypainter;
 
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
-import eu.pb4.sgui.api.elements.GuiElementBuilderInterface;
-import eu.pb4.sgui.api.gui.SimpleGui;
 import io.github.aws404.easypainter.custom.CustomMotivesManager;
-import io.github.aws404.easypainter.custom.MotiveCacheState;
 import io.github.aws404.easypainter.custom.PagedSimpleGui;
 import io.github.aws404.easypainter.mixin.AbstractDecorationEntityAccessor;
 import io.github.aws404.easypainter.mixin.PaintingEntityMixinAccessor;
@@ -15,7 +12,6 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -70,7 +66,7 @@ public class SelectionGui extends PagedSimpleGui {
 
     private void changePainting(PaintingVariant motive) {
         if (motive instanceof CustomMotivesManager.CustomMotive) {
-            ((PaintingEntityMixinAccessor) this.entity).setCustomVariant((CustomMotivesManager.CustomMotive) motive);
+            ((PaintingEntityMixinAccessor) this.entity).easy_painter_master$setCustomVariant((CustomMotivesManager.CustomMotive) motive);
         } else {
             Optional<RegistryEntry.Reference<PaintingVariant>> variant = Registries.PAINTING_VARIANT.getEntry(Registries.PAINTING_VARIANT.getId(motive));
             if (variant.isEmpty()) return;

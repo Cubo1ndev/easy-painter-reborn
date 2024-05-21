@@ -5,8 +5,8 @@
   "compatibilityLevel": "JAVA_16",
   "server": [
     "AbstractDecorationEntityAccessor",
-    "MapStateAccessor",
     "PaintingEntityMixin",
+    "MapStateAccessor",
     "SeverResourceManagerMixin"
   ],
   "injectors": {

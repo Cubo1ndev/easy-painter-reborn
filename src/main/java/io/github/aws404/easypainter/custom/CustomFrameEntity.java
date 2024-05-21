@@ -1,7 +1,5 @@
 package io.github.aws404.easypainter.custom;
 
-import io.github.aws404.easypainter.EasyPainter;
-import io.github.aws404.easypainter.mixin.PaintingEntityMixin;
 import io.github.aws404.easypainter.mixin.PaintingEntityMixinAccessor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -32,7 +30,7 @@ public class CustomFrameEntity extends ItemFrameEntity {
     public CustomFrameEntity(World world, PaintingEntity painting, BlockPos pos, ItemStack stack) {
         super(EntityType.ITEM_FRAME, world, pos, painting.getHorizontalFacing());
         this.painting = painting;
-        this.motive = ((PaintingEntityMixinAccessor) this.painting).getCustomVariant();
+        this.motive = ((PaintingEntityMixinAccessor) this.painting).easy_painter_master$getCustomVariant();
         this.setHeldItemStack(stack);
     }
 
@@ -84,7 +82,7 @@ public class CustomFrameEntity extends ItemFrameEntity {
 
     @Override
     public Packet<ClientPlayPacketListener> createSpawnPacket() {
-        if (((PaintingEntityMixinAccessor) this.painting).getCustomVariant() != null) {
+        if (((PaintingEntityMixinAccessor) this.painting).easy_painter_master$getCustomVariant() != null) {
             System.out.println(1);
             return new EntitySpawnS2CPacket(((ItemFrameEntity)this), 0, this.getDecorationBlockPos());
         }
