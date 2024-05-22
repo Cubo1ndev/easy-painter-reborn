@@ -160,7 +160,7 @@ public class MotiveCacheState extends PersistentState {
             this.mapIds = mapIds;
         }
 
-        Identifier getId() {
+        public Identifier getId() {
             return id;
         }
 

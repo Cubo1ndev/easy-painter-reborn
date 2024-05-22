@@ -1,5 +1,7 @@
 package io.github.aws404.easypainter.custom;
 
+import eu.pb4.polymer.core.api.entity.PolymerEntity;
+import io.github.aws404.easypainter.EasyPainter;
 import io.github.aws404.easypainter.PaintingEntityAccessor;
 import io.github.aws404.easypainter.mixin.ItemFrameEntityAccessor;
 import net.minecraft.entity.Entity;
@@ -15,6 +17,7 @@ import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -24,14 +27,14 @@ import org.jetbrains.annotations.Nullable;
 /**
  * This is the extension of ItemFrame used for custom painting motives
  */
-public class CustomFrameEntity extends ItemFrameEntity {
+public class CustomFrameEntity extends ItemFrameEntity implements PolymerEntity {
 
     public PaintingEntity painting;
     public CustomMotivesManager.CustomMotive motive;
     public int index;
 
     public CustomFrameEntity(World world, PaintingEntity painting, BlockPos pos, ItemStack stack, int i) {
-        super(EntityType.ITEM_FRAME, world, pos, painting.getHorizontalFacing());
+        super(EasyPainter.CUSTOM_ITEM_FRAME_ENTITY_TYPE, world, pos, painting.getHorizontalFacing());
         this.painting = painting;
         this.motive = ((PaintingEntityAccessor) this.painting).easy_painter_master$getCustomVariant();
         this.index = i;
@@ -41,10 +44,6 @@ public class CustomFrameEntity extends ItemFrameEntity {
 
     public CustomFrameEntity(EntityType<CustomFrameEntity> entityType, World world) {
         super(entityType, world);
-    }
-
-    public CustomFrameEntity(World world) {
-        super(EntityType.ITEM_FRAME, world);
     }
 
     @Override
@@ -132,5 +131,10 @@ public class CustomFrameEntity extends ItemFrameEntity {
     @Override
     public ActionResult interact(PlayerEntity player, Hand hand) {
         return this.painting.interact(player, hand);
+    }
+
+    @Override
+    public EntityType<?> getPolymerEntityType(ServerPlayerEntity player) {
+        return EntityType.ITEM_FRAME;
     }
 }

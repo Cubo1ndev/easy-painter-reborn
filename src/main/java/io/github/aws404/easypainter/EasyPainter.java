@@ -1,5 +1,7 @@
 package io.github.aws404.easypainter;
 
+import eu.pb4.polymer.core.api.entity.PolymerEntity;
+import eu.pb4.polymer.core.api.entity.PolymerEntityUtils;
 import io.github.aws404.easypainter.command.EasyPainterCommand;
 import io.github.aws404.easypainter.custom.CustomFrameEntity;
 import io.github.aws404.easypainter.custom.CustomMotivesManager;
@@ -36,6 +38,7 @@ public class EasyPainter implements ModInitializer {
 	//public static final EntityType<CustomFrameEntity> CUSTOM_FRAME_ENTITY = registerEntity(CustomFrameEntity::new);
     //public static final PaintingItem PAINTING_ITEM_OVERRIDE = Registry.register(Registries.ITEM, Registries.ITEM.getId(Items.PAINTING), new PaintingItem(new Item.Settings()));
 
+    public static final EntityType<CustomFrameEntity> CUSTOM_ITEM_FRAME_ENTITY_TYPE = Registry.register(Registries.ENTITY_TYPE, new Identifier("easy_painter", "custom_item_frame"), EntityType.Builder.<CustomFrameEntity>create(CustomFrameEntity::new, SpawnGroup.MISC).disableSaving().disableSummon().makeFireImmune().build());
 	public static CustomMotivesManager customMotivesManager;
 
     @Override
@@ -44,6 +47,8 @@ public class EasyPainter implements ModInitializer {
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> EasyPainterCommand.register(dispatcher));
 
+        LOGGER.info("Saveable: " + (CUSTOM_ITEM_FRAME_ENTITY_TYPE.isSaveable() ? "Yes" : "No"));
+        PolymerEntityUtils.registerType(CUSTOM_ITEM_FRAME_ENTITY_TYPE);
         ServerWorldEvents.LOAD.register((server, world) -> {
             if (world.getRegistryKey() == World.OVERWORLD) {
                 EasyPainter.customMotivesManager = new CustomMotivesManager(world.getPersistentStateManager());
@@ -119,12 +124,12 @@ public class EasyPainter implements ModInitializer {
         return i % 32 == 0 ? 0.5D : 0.0D;
     }
 
-    private static <T extends Entity> EntityType<T> registerEntity(EntityType.EntityFactory<T> factory) {
+    /*private static <T extends Entity> EntityType<T> registerEntity(EntityType.EntityFactory<T> factory, String id) {
         return Registry.register(
                 Registries.ENTITY_TYPE,
-                "easy_painter:" + "frame_entity",
+                "easy_painter:" + id,
                 EntityType.Builder.create(factory, SpawnGroup.MISC).disableSaving().disableSummon().makeFireImmune().build()
         );
-    }
+    }*/
 
 }

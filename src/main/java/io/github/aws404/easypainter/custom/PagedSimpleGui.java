@@ -57,8 +57,6 @@ public class PagedSimpleGui extends SimpleGui {
             this.clearSlot(i);
         }
 
-        System.out.println("p: " + this.page);
-        System.out.println("s: " + this.slots.size());
         int startIndex = (this.page - 1) * maxItemsPerPage;
         for (int i = startIndex; i < startIndex + maxItemsPerPage; i++) {
             if (i >= this.slots.size()) break;

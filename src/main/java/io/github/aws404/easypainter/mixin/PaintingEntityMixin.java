@@ -19,9 +19,11 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.resource.ResourceManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -94,8 +96,7 @@ public abstract class PaintingEntityMixin extends AbstractDecorationEntity imple
 			this.customPaintingFrames = new CustomFrameEntity[0];
 		}
 
-		//PaintingVariant variant = this.dataTracker.get(VARIANT).value();
-		if (/*variant instanceof CustomMotivesManager.CustomMotive*/ CUSTOM_VARIANT != null && CUSTOM_VARIANT != this.cachedMotive) {
+		if (CUSTOM_VARIANT != null && ((CUSTOM_VARIANT != this.cachedMotive) || (this.customPaintingFrames.length != this.customFrameEntityLength))) {
 			MotiveCacheState.Entry state = CUSTOM_VARIANT.state;
 			this.customPaintingFrames = new CustomFrameEntity[state.blockWidth * state.blockHeight];
 			this.customFrameEntityLength = state.blockWidth * state.blockHeight;
@@ -148,12 +149,20 @@ public abstract class PaintingEntityMixin extends AbstractDecorationEntity imple
 		if (nbt.contains("Length")) {
 			this.customFrameEntityLength = nbt.getInt("Length");
 		}
+		if (nbt.contains("CustomVariant")) {
+			Identifier id = new Identifier(nbt.getString("CustomVariant"));
+            EasyPainter.LOGGER.info("Loading '{}' from NBT", id.toString());
+			CUSTOM_VARIANT = EasyPainter.customMotivesManager.getMotive(id);
+		}
 	}
 
 	@Inject(method = "writeCustomDataToNbt", at = @At("HEAD"))
 	private void writeCustomDataToNbt(NbtCompound nbt, CallbackInfo ci) {
 		nbt.putBoolean("Locked", this.locked);
 		nbt.putInt("Length", this.customFrameEntityLength);
+		if (CUSTOM_VARIANT != null) {
+			nbt.putString("CustomVariant", CUSTOM_VARIANT.state.getId().toString());
+		}
 	}
 
 	@Inject(method = "createSpawnPacket", at = @At("HEAD"), cancellable = true)
