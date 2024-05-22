@@ -1,27 +1,34 @@
 package io.github.aws404.easypainter;
 
-import eu.pb4.polymer.core.api.entity.PolymerEntity;
+import com.mojang.datafixers.types.templates.Tag;
 import eu.pb4.polymer.core.api.entity.PolymerEntityUtils;
 import io.github.aws404.easypainter.command.EasyPainterCommand;
 import io.github.aws404.easypainter.custom.CustomFrameEntity;
 import io.github.aws404.easypainter.custom.CustomMotivesManager;
+import io.github.aws404.easypainter.mixin.ItemFrameEntityAccessor;
+import io.github.aws404.easypainter.mixin.PaintingEntityMixin;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
+import net.fabricmc.fabric.impl.tag.convention.v2.TagRegistration;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.block.AbstractRedstoneGateBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.decoration.painting.PaintingEntity;
 import net.minecraft.entity.decoration.painting.PaintingVariant;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -29,12 +36,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class EasyPainter implements ModInitializer {
-
     public static final Logger LOGGER = LogManager.getLogger();
 
-	/*public static final Tag<Block> PAINTING_IGNORED = TagRegistry.block(new Identifier("easy_painter:painting_ignored"));
-	public static final Tag<Block> CANNOT_SUPPORT_PAINTING = TagRegistry.block(new Identifier("easy_painter:cannot_support_painting"));
-	public static final TagRegistration<EntityType<?>> PAINTING_INTERACT = TagRegTistry.entityType(new Identifier("easy_painter:painting_interact"));*/
+	public static final TagKey<Block> PAINTING_IGNORED = TagKey.of(RegistryKeys.BLOCK, new Identifier("easy_painter:painting_ignored"));
+	public static final TagKey<Block> CANNOT_SUPPORT_PAINTING = TagKey.of(RegistryKeys.BLOCK, new Identifier("easy_painter:cannot_support_painting"));
+	//public static final TagRegistration<EntityType<?>> PAINTING_INTERACT = TagRegTistry.entityType(new Identifier("easy_painter:painting_interact"));
 	//public static final EntityType<CustomFrameEntity> CUSTOM_FRAME_ENTITY = registerEntity(CustomFrameEntity::new);
     //public static final PaintingItem PAINTING_ITEM_OVERRIDE = Registry.register(Registries.ITEM, Registries.ITEM.getId(Items.PAINTING), new PaintingItem(new Item.Settings()));
 
@@ -47,7 +53,6 @@ public class EasyPainter implements ModInitializer {
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> EasyPainterCommand.register(dispatcher));
 
-        LOGGER.info("Saveable: " + (CUSTOM_ITEM_FRAME_ENTITY_TYPE.isSaveable() ? "Yes" : "No"));
         PolymerEntityUtils.registerType(CUSTOM_ITEM_FRAME_ENTITY_TYPE);
         ServerWorldEvents.LOAD.register((server, world) -> {
             if (world.getRegistryKey() == World.OVERWORLD) {
@@ -69,11 +74,14 @@ public class EasyPainter implements ModInitializer {
 
         int widthPixels = motive.getWidth();
         int heightPixels = motive.getHeight();
-        /*int widthBlocks = widthPixels / 16;
+        int widthBlocks = widthPixels / 16;
         int heightBlocks = heightPixels / 16;
 
         int attachX = (widthBlocks - 1) / -2;
         int attachY = (heightBlocks - 1) / -2;
+
+        BlockPos blockPos = entity.getDecorationBlockPos().offset(entity.getFacing().getOpposite());
+        Direction direction = entity.getFacing().rotateYCounterclockwise();
 
         BlockPos.Mutable mutable = new BlockPos.Mutable();
         for (int x = 0; x < widthBlocks; x++) {
@@ -81,20 +89,30 @@ public class EasyPainter implements ModInitializer {
                 mutable.set(entity.getDecorationBlockPos()).move(rotated, x + attachX).move(Direction.UP, y + attachY);
                 BlockState inside = entity.getWorld().getBlockState(mutable);
 
-                mutable.move(facing.getOpposite());
+                int m = (x - 1) / -2;
+                int n = (y - 1) / -2;
+                mutable.set(blockPos).move(direction, x + m).move(Direction.UP, y + n);
                 BlockState behind = entity.getWorld().getBlockState(mutable);
-
                 if (!inside.isIn(PAINTING_IGNORED) || behind.isIn(CANNOT_SUPPORT_PAINTING)) {
                     return false;
                 }
             }
-        }*/
+        }
 
-        return entity.getWorld().getOtherEntities(entity, getBoundingBox(entity, motive, facing, rotated, widthPixels, heightPixels)).isEmpty();
+        for (Entity element : entity.getWorld().getOtherEntities(entity, getBoundingBox(entity, motive, facing, rotated, widthPixels, heightPixels))) {
+            if ((element instanceof PaintingEntity) && (element == entity)) {
+
+            } else if (element instanceof CustomFrameEntity) {
+                if (!((PaintingEntityAccessor) entity).easy_painter_master$isEntityInCustonPaintingFrameList((CustomFrameEntity) element)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private static Box getBoundingBox(PaintingEntity entity, PaintingVariant motive, Direction facing, Direction rotated, int widthPixels, int heightPixels) {
-        if (entity.getVariant() == motive) {
+        if (entity.getVariant().value() == motive) {
             return entity.getBoundingBox();
         } else {
             double widthOffset = getOffset(widthPixels);
@@ -114,10 +132,15 @@ public class EasyPainter implements ModInitializer {
     public static MutableText getPaintingDisplayName(Identifier id) {
         String translationKey = Util.createTranslationKey("painting", id);
         //if (ServerTranslations.INSTANCE.getLanguage(translationKey) != null) {
-            return Text.translatable(translationKey);
+        return Text.translatable(translationKey + ".title");
         //}
 
         //return Text.literal(StringUtils.capitalize(id.getPath().replace("_", " ")));
+    }
+
+    public static MutableText getPaintingAuthor(Identifier id) {
+        String translationKey = Util.createTranslationKey("painting", id);
+        return Text.translatable(translationKey + ".author");
     }
 
     private static double getOffset(int i) {

@@ -1,5 +1,6 @@
 package io.github.aws404.easypainter.custom;
 
+import com.jcraft.jorbis.Block;
 import eu.pb4.polymer.core.api.entity.PolymerEntity;
 import io.github.aws404.easypainter.EasyPainter;
 import io.github.aws404.easypainter.PaintingEntityAccessor;
@@ -61,11 +62,12 @@ public class CustomFrameEntity extends ItemFrameEntity implements PolymerEntity 
         if (this.painting.isRemoved()) {
             this.remove(RemovalReason.DISCARDED);
         }
+        this.updateAttachmentPosition();
     }
 
     @Override
     public void readCustomDataFromNbt(NbtCompound nbt) {
-        if (nbt.contains("PaintingId") && nbt.contains("PaintingIndex")) {
+       /* if (nbt.contains("PaintingId") && nbt.contains("PaintingIndex")) {
             this.painting = (PaintingEntity) this.getWorld().getEntityById(nbt.getInt("PaintingId"));
             this.index = nbt.getInt("PaintingIndex");
             System.out.println(this.painting);
@@ -73,7 +75,7 @@ public class CustomFrameEntity extends ItemFrameEntity implements PolymerEntity 
             ((PaintingEntityAccessor) this.painting).easy_painter_master$addCustomPaintingFrame(this, this.index);
         } else {
             this.kill();
-        }
+        }*/
         super.readCustomDataFromNbt(nbt);
     }
 
@@ -113,7 +115,7 @@ public class CustomFrameEntity extends ItemFrameEntity implements PolymerEntity 
     @Override
     public Packet<ClientPlayPacketListener> createSpawnPacket() {
         if (((PaintingEntityAccessor) this.painting).easy_painter_master$getCustomVariant() != null) {
-            return new EntitySpawnS2CPacket(this, 0, this.getDecorationBlockPos());
+            return new EntitySpawnS2CPacket(this, this.facing.getId(), this.getDecorationBlockPos());
         }
         return new EntitiesDestroyS2CPacket(this.getId());
     }

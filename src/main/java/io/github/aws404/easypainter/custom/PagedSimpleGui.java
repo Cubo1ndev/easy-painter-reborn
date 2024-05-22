@@ -6,6 +6,7 @@ import eu.pb4.sgui.api.elements.GuiElementInterface;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import io.github.aws404.easypainter.EasyPainter;
 import io.github.aws404.easypainter.SelectionGui;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -17,7 +18,7 @@ import java.util.List;
 
 public class PagedSimpleGui extends SimpleGui {
     private final List<GuiElementInterface> slots;
-    private int page = 1;
+    private int page = 0;
 
     private final int maxItemsPerPage = 9 * 5;
 
@@ -36,18 +37,22 @@ public class PagedSimpleGui extends SimpleGui {
         GuiElementBuilder builder = new GuiElementBuilder(Items.MAGENTA_GLAZED_TERRACOTTA)
                 .setName(Text.translatable("screen.easy_painter.previous_page").formatted(Formatting.YELLOW))
                 .setCallback((index, type1, action) -> {
-                    this.page = (int) Math.clamp(this.page - 1, 1, Math.ceil((double) this.slots.size() / maxItemsPerPage));
+                    this.page = (int) Math.clamp(this.page - 1, 0, Math.ceil((double) this.slots.size() / maxItemsPerPage));
                     updatePage();
                 });
         this.setSlot(45, builder);
 
-        GuiElementBuilder builder2 = new GuiElementBuilder(Items.MAGENTA_GLAZED_TERRACOTTA)
+        GuiElementBuilder builder2 = new GuiElementBuilder(Items.YELLOW_CANDLE)
+                .setName(Text.translatable("screen.easy_painter.page_1").formatted(Formatting.YELLOW));
+        this.setSlot(49, builder2);
+
+        GuiElementBuilder builder3 = new GuiElementBuilder(Items.MAGENTA_GLAZED_TERRACOTTA)
                 .setName(Text.translatable("screen.easy_painter.next_page").formatted(Formatting.YELLOW))
                 .setCallback((index, type1, action) -> {
-                    this.page = (int) Math.clamp(this.page + 1, 1, Math.ceil((double) this.slots.size() / maxItemsPerPage));
+                    this.page = (int) Math.clamp(this.page + 1, 0, Math.ceil((double) this.slots.size() / maxItemsPerPage));
                     updatePage();
                 });
-        this.setSlot(53, builder2);
+        this.setSlot(53, builder3);
 
         updatePage();
     }
@@ -57,11 +62,17 @@ public class PagedSimpleGui extends SimpleGui {
             this.clearSlot(i);
         }
 
-        int startIndex = (this.page - 1) * maxItemsPerPage;
+        int startIndex = this.page * maxItemsPerPage;
         for (int i = startIndex; i < startIndex + maxItemsPerPage; i++) {
             if (i >= this.slots.size()) break;
             GuiElementInterface slot = this.slots.get(i);
             this.setSlot(this.getFirstEmptySlot(), slot);
+        }
+
+        GuiElementInterface element = this.getSlot(49);
+        if (element != null) {
+            int realPage = this.page + 1;
+            element.getItemStack().set(DataComponentTypes.ITEM_NAME, Text.translatable("screen.easy_painter.page_" + (realPage)).formatted(Formatting.YELLOW));
         }
     }
 

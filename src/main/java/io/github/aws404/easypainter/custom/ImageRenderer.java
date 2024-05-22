@@ -46,6 +46,7 @@ public class ImageRenderer {
         }
 
         MapIdComponent stateId = world.getNextMapId(); //getNextPaintingId(stateManager);
+        stateId = stateId.id() == 0 ? new MapIdComponent(1) : stateId;
         //stateManager.set("map_" + stateId, state);
         world.putMapState(stateId, state);
         return stateId.id();

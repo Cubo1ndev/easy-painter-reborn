@@ -27,7 +27,7 @@ public class SeverResourceManagerMixin {
     @Inject(method = "reload", at = @At(value = "RETURN", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD)
     private static void onReloadDataPacks(ResourceManager manager, CombinedDynamicRegistries<ServerDynamicRegistryType> dynamicRegistries, FeatureSet enabledFeatures, CommandManager.RegistrationEnvironment environment, int functionPermissionLevel, Executor prepareExecutor, Executor applyExecutor, CallbackInfoReturnable<CompletableFuture<DataPackContents>> cir) {
         if (EasyPainter.customMotivesManager != null) {
-            //EasyPainter.customMotivesManager.reload(manager);
+            //EasyPainter.customMotivesManager.reload();
         }
     }
 }

@@ -8,5 +8,7 @@ public interface PaintingEntityAccessor {
 
     void easy_painter_master$setCustomVariant(CustomMotivesManager.CustomMotive motive);
 
-    void easy_painter_master$addCustomPaintingFrame(CustomFrameEntity entity, int i);
+    //void easy_painter_master$addCustomPaintingFrame(CustomFrameEntity entity, int i);
+
+    boolean easy_painter_master$isEntityInCustonPaintingFrameList(CustomFrameEntity entity);
 }

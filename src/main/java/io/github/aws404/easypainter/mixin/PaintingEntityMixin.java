@@ -37,6 +37,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 @Mixin(PaintingEntity.class)
 public abstract class PaintingEntityMixin extends AbstractDecorationEntity implements PaintingEntityAccessor {
 	@Shadow public abstract int getWidthPixels();
@@ -44,7 +48,7 @@ public abstract class PaintingEntityMixin extends AbstractDecorationEntity imple
 	@Final @Shadow private static TrackedData<RegistryEntry<PaintingVariant>> VARIANT;
 
 	@Unique private boolean locked = false;
-	@Unique private CustomFrameEntity[] customPaintingFrames = new CustomFrameEntity[0];
+	@Unique private Set<CustomFrameEntity> customPaintingFrames = new HashSet<>();
 	@Unique private CustomMotivesManager.CustomMotive cachedMotive;
 	@Unique @Nullable private CustomMotivesManager.CustomMotive CUSTOM_VARIANT;
 	@Unique private int customFrameEntityLength = 0;
@@ -93,12 +97,12 @@ public abstract class PaintingEntityMixin extends AbstractDecorationEntity imple
 			for (CustomFrameEntity customPaintingFrame : this.customPaintingFrames) {
 				customPaintingFrame.remove(RemovalReason.DISCARDED);
 			}
-			this.customPaintingFrames = new CustomFrameEntity[0];
+			this.customPaintingFrames.clear();
 		}
 
-		if (CUSTOM_VARIANT != null && ((CUSTOM_VARIANT != this.cachedMotive) || (this.customPaintingFrames.length != this.customFrameEntityLength))) {
+		if (CUSTOM_VARIANT != null && ((CUSTOM_VARIANT != this.cachedMotive) || (this.customPaintingFrames.size() != this.customFrameEntityLength))) {
 			MotiveCacheState.Entry state = CUSTOM_VARIANT.state;
-			this.customPaintingFrames = new CustomFrameEntity[state.blockWidth * state.blockHeight];
+			this.customPaintingFrames.clear();
 			this.customFrameEntityLength = state.blockWidth * state.blockHeight;
 
 			int widthBlocks = CUSTOM_VARIANT.getWidth() / 16;
@@ -120,7 +124,7 @@ public abstract class PaintingEntityMixin extends AbstractDecorationEntity imple
 					CustomFrameEntity entity = new CustomFrameEntity(this.getWorld(), (PaintingEntity) (Object) this, pos, stack, i);
 					this.getWorld().spawnEntity(entity);
 
-					this.customPaintingFrames[i] = entity;
+					this.customPaintingFrames.add(entity);
 
 					i++;
 				}
@@ -139,8 +143,12 @@ public abstract class PaintingEntityMixin extends AbstractDecorationEntity imple
 		CUSTOM_VARIANT = motive;
 	}
 
-	public void easy_painter_master$addCustomPaintingFrame(CustomFrameEntity entity, int i) {
-		this.customPaintingFrames[i] = entity;
+	/*public void easy_painter_master$addCustomPaintingFrame(CustomFrameEntity entity, int i) {
+		//this.customPaintingFrames[i] = entity;
+	}*/
+
+	public boolean easy_painter_master$isEntityInCustonPaintingFrameList(CustomFrameEntity entity) {
+		return this.customPaintingFrames.contains(entity);
 	}
 
 	@Inject(method = "readCustomDataFromNbt", at = @At("HEAD"))
@@ -151,7 +159,6 @@ public abstract class PaintingEntityMixin extends AbstractDecorationEntity imple
 		}
 		if (nbt.contains("CustomVariant")) {
 			Identifier id = new Identifier(nbt.getString("CustomVariant"));
-            EasyPainter.LOGGER.info("Loading '{}' from NBT", id.toString());
 			CUSTOM_VARIANT = EasyPainter.customMotivesManager.getMotive(id);
 		}
 	}
