@@ -26,6 +26,9 @@ dependencies {
 
 	// Server Gui Library
 	modImplementation include("eu.pb4:sgui:${project.sgui_version}")
+
+	// Polymer Library
+	modImplementation include("eu.pb4:polymer-core:${project.polymer_version}")
 }
 
 processResources {

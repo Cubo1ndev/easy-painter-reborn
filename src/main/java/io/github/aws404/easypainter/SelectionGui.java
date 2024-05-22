@@ -4,7 +4,6 @@ import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import io.github.aws404.easypainter.custom.CustomMotivesManager;
 import io.github.aws404.easypainter.custom.PagedSimpleGui;
 import io.github.aws404.easypainter.mixin.AbstractDecorationEntityAccessor;
-import io.github.aws404.easypainter.mixin.PaintingEntityMixinAccessor;
 import net.minecraft.entity.decoration.painting.PaintingEntity;
 import net.minecraft.entity.decoration.painting.PaintingVariant;
 import net.minecraft.item.Items;
@@ -30,43 +29,41 @@ public class SelectionGui extends PagedSimpleGui {
         this.entity = entity;
         this.setTitle(Text.translatable("screen.easy_painter.title"));
 
-        for (int i = 0; i < 10; i++) {
-            for (PaintingVariant possibility : motives) {
-                Identifier id = Registries.PAINTING_VARIANT.getId(possibility);
-                if (possibility instanceof CustomMotivesManager.CustomMotive) {
-                    Identifier newId = EasyPainter.customMotivesManager.getMotiveId((CustomMotivesManager.CustomMotive) possibility);
-                    if (newId != null) {
-                        id = newId;
-                    }
+        for (PaintingVariant possibility : motives) {
+            Identifier id = Registries.PAINTING_VARIANT.getId(possibility);
+            if (possibility instanceof CustomMotivesManager.CustomMotive) {
+                Identifier newId = EasyPainter.customMotivesManager.getMotiveId((CustomMotivesManager.CustomMotive) possibility);
+                if (newId != null) {
+                    id = newId;
                 }
-
-                GuiElementBuilder builder = new GuiElementBuilder(Items.PAINTING)
-                        .setName(EasyPainter.getPaintingDisplayName(id).formatted(Formatting.YELLOW))
-                        .addLoreLine(Text.literal("")
-                                .append(Text.translatable("screen.easy_painter.bullet").formatted(Formatting.GOLD))
-                                .append(Text.translatable("screen.easy_painter.size",
-                                        Text.translatable("screen.easy_painter.size.data", possibility.getHeight() / 16, possibility.getWidth() / 16).formatted(Formatting.WHITE)
-                                ).formatted(Formatting.YELLOW))
-                        )
-                        .setCallback((index, type1, action) -> {
-                            this.close();
-                            this.changePainting(possibility);
-                        });
-
-                if (possibility == entity.getVariant()) {
-                    builder.addLoreLine(Text.literal(""));
-                    builder.addLoreLine(Text.translatable("screen.easy_painter.currently_selected").formatted(Formatting.GRAY));
-                    builder.glow();
-                }
-
-                this.addSlot(builder);
             }
+
+            GuiElementBuilder builder = new GuiElementBuilder(Items.PAINTING)
+                    .setName(EasyPainter.getPaintingDisplayName(id).formatted(Formatting.YELLOW))
+                    .addLoreLine(Text.literal("")
+                            .append(Text.translatable("screen.easy_painter.bullet").formatted(Formatting.GOLD))
+                            .append(Text.translatable("screen.easy_painter.size",
+                                    Text.translatable("screen.easy_painter.size.data", possibility.getHeight() / 16, possibility.getWidth() / 16).formatted(Formatting.WHITE)
+                            ).formatted(Formatting.YELLOW))
+                    )
+                    .setCallback((index, type1, action) -> {
+                        this.close();
+                        this.changePainting(possibility);
+                    });
+
+            if (possibility == entity.getVariant()) {
+                builder.addLoreLine(Text.literal(""));
+                builder.addLoreLine(Text.translatable("screen.easy_painter.currently_selected").formatted(Formatting.GRAY));
+                builder.glow();
+            }
+
+            this.addSlot(builder);
         }
     }
 
     private void changePainting(PaintingVariant motive) {
         if (motive instanceof CustomMotivesManager.CustomMotive) {
-            ((PaintingEntityMixinAccessor) this.entity).easy_painter_master$setCustomVariant((CustomMotivesManager.CustomMotive) motive);
+            ((PaintingEntityAccessor) this.entity).easy_painter_master$setCustomVariant((CustomMotivesManager.CustomMotive) motive);
         } else {
             Optional<RegistryEntry.Reference<PaintingVariant>> variant = Registries.PAINTING_VARIANT.getEntry(Registries.PAINTING_VARIANT.getId(motive));
             if (variant.isEmpty()) return;

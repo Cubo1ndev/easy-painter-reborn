@@ -4,8 +4,11 @@ import io.github.aws404.easypainter.EasyPainter;
 import io.github.aws404.easypainter.SelectionGui;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.decoration.AbstractDecorationEntity;
+import net.minecraft.entity.decoration.GlowItemFrameEntity;
+import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.entity.decoration.painting.PaintingEntity;
 import net.minecraft.entity.decoration.painting.PaintingVariant;
 import net.minecraft.entity.decoration.painting.PaintingVariants;
@@ -26,6 +29,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import net.minecraft.world.event.GameEvent;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -38,12 +42,16 @@ public abstract class DecorationItemMixin extends Item {
 
     //@Shadow protected abstract void canPlaceOn();
 
+    @Shadow @Final private EntityType<? extends AbstractDecorationEntity> entityType;
+
     public DecorationItemMixin(Settings settings) {
         super(settings);
     }
 
     @Override
     public Text getName(ItemStack stack) {
+        if (this.entityType != EntityType.PAINTING) return this.getName();
+
         MutableText text = (MutableText) super.getName(stack);
         NbtComponent entityComponent = stack.get(DataComponentTypes.ENTITY_DATA);
         String str = entityComponent.copyNbt().getString("custom_variant");
@@ -54,11 +62,11 @@ public abstract class DecorationItemMixin extends Item {
 
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);
+        if (this.entityType != EntityType.PAINTING) return TypedActionResult.success(stack);
+
         if (user.isSneaking()) {
-            System.out.println("1");
             Objects.requireNonNull(stack.get(DataComponentTypes.CUSTOM_DATA)).getNbt().putBoolean("EntityTag", false);
         } else if (stack.get(DataComponentTypes.CUSTOM_DATA) != null && Objects.requireNonNull(stack.get(DataComponentTypes.CUSTOM_DATA)).getNbt().getBoolean("EntityTag")) {
-            System.out.println("2");
             NbtComponent nbtComponent = stack.get(DataComponentTypes.ENTITY_DATA);
             Identifier current = Identifier.tryParse(nbtComponent.copyNbt().getString("Motive"));
             int newRaw = Registries.PAINTING_VARIANT.getRawId(Registries.PAINTING_VARIANT.get(current)) + 1;
@@ -68,7 +76,6 @@ public abstract class DecorationItemMixin extends Item {
             nbtComponent.getNbt().putString("Motive", Registries.PAINTING_VARIANT.getId(Registries.PAINTING_VARIANT.get(newRaw)).toString());
             stack.set(DataComponentTypes.ENTITY_DATA, nbtComponent);
         } else {
-            System.out.println("3");
             //NbtCompound entityTag = Objects.requireNonNull(stack.get(DataComponentTypes.CUSTOM_DATA)).getNbt();
             //entityTag.putString("Motive", Registries.PAINTING_VARIANT.getId(Registries.PAINTING_VARIANT.get(PaintingVariants.ALBAN.getRegistry())).toString());
         }
@@ -82,6 +89,46 @@ public abstract class DecorationItemMixin extends Item {
 
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
+        if (this.entityType != EntityType.PAINTING) {
+            AbstractDecorationEntity abstractDecorationEntity;
+            BlockPos blockPos = context.getBlockPos();
+            Direction direction = context.getSide();
+            BlockPos blockPos2 = blockPos.offset(direction);
+            PlayerEntity playerEntity = context.getPlayer();
+            ItemStack itemStack = context.getStack();
+            if (playerEntity != null && !this.canPlaceOn(playerEntity, direction, itemStack, blockPos2)) {
+                return ActionResult.FAIL;
+            }
+            World world = context.getWorld();
+            if (this.entityType == EntityType.PAINTING) {
+                Optional<PaintingEntity> optional = PaintingEntity.placePainting(world, blockPos2, direction);
+                if (optional.isEmpty()) {
+                    return ActionResult.CONSUME;
+                }
+                abstractDecorationEntity = optional.get();
+            } else if (this.entityType == EntityType.ITEM_FRAME) {
+                abstractDecorationEntity = new ItemFrameEntity(world, blockPos2, direction);
+            } else if (this.entityType == EntityType.GLOW_ITEM_FRAME) {
+                abstractDecorationEntity = new GlowItemFrameEntity(world, blockPos2, direction);
+            } else {
+                return ActionResult.success(world.isClient);
+            }
+            NbtComponent nbtComponent = itemStack.getOrDefault(DataComponentTypes.ENTITY_DATA, NbtComponent.DEFAULT);
+            if (!nbtComponent.isEmpty()) {
+                EntityType.loadFromEntityNbt(world, playerEntity, abstractDecorationEntity, nbtComponent);
+            }
+            if (abstractDecorationEntity.canStayAttached()) {
+                if (!world.isClient) {
+                    abstractDecorationEntity.onPlace();
+                    world.emitGameEvent((Entity)playerEntity, GameEvent.ENTITY_PLACE, abstractDecorationEntity.getPos());
+                    world.spawnEntity(abstractDecorationEntity);
+                }
+                itemStack.decrement(1);
+                return ActionResult.success(world.isClient);
+            }
+            return ActionResult.CONSUME;
+        }
+
         BlockPos blockPos = context.getBlockPos();
         Direction direction = context.getSide();
         BlockPos blockPos2 = blockPos.offset(direction);

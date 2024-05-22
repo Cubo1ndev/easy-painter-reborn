@@ -1,6 +1,7 @@
 package io.github.aws404.easypainter.custom;
 
-import io.github.aws404.easypainter.mixin.PaintingEntityMixinAccessor;
+import io.github.aws404.easypainter.PaintingEntityAccessor;
+import io.github.aws404.easypainter.mixin.ItemFrameEntityAccessor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
@@ -9,6 +10,7 @@ import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.entity.decoration.painting.PaintingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket;
@@ -26,16 +28,23 @@ public class CustomFrameEntity extends ItemFrameEntity {
 
     public PaintingEntity painting;
     public CustomMotivesManager.CustomMotive motive;
+    public int index;
 
-    public CustomFrameEntity(World world, PaintingEntity painting, BlockPos pos, ItemStack stack) {
+    public CustomFrameEntity(World world, PaintingEntity painting, BlockPos pos, ItemStack stack, int i) {
         super(EntityType.ITEM_FRAME, world, pos, painting.getHorizontalFacing());
         this.painting = painting;
-        this.motive = ((PaintingEntityMixinAccessor) this.painting).easy_painter_master$getCustomVariant();
+        this.motive = ((PaintingEntityAccessor) this.painting).easy_painter_master$getCustomVariant();
+        this.index = i;
+        ((ItemFrameEntityAccessor) this).setFixed(true);
         this.setHeldItemStack(stack);
     }
 
     public CustomFrameEntity(EntityType<CustomFrameEntity> entityType, World world) {
         super(entityType, world);
+    }
+
+    public CustomFrameEntity(World world) {
+        super(EntityType.ITEM_FRAME, world);
     }
 
     @Override
@@ -53,6 +62,28 @@ public class CustomFrameEntity extends ItemFrameEntity {
         if (this.painting.isRemoved()) {
             this.remove(RemovalReason.DISCARDED);
         }
+    }
+
+    @Override
+    public void readCustomDataFromNbt(NbtCompound nbt) {
+        if (nbt.contains("PaintingId") && nbt.contains("PaintingIndex")) {
+            this.painting = (PaintingEntity) this.getWorld().getEntityById(nbt.getInt("PaintingId"));
+            this.index = nbt.getInt("PaintingIndex");
+            System.out.println(this.painting);
+            System.out.println(this.index);
+            ((PaintingEntityAccessor) this.painting).easy_painter_master$addCustomPaintingFrame(this, this.index);
+        } else {
+            this.kill();
+        }
+        super.readCustomDataFromNbt(nbt);
+    }
+
+    @Override
+    public void writeCustomDataToNbt(NbtCompound nbt) {
+        nbt.putInt("PaintingId", this.painting.getId());
+        nbt.putInt("PaintingIndex", this.index);
+
+        super.writeCustomDataToNbt(nbt);
     }
 
     @Override
@@ -82,11 +113,9 @@ public class CustomFrameEntity extends ItemFrameEntity {
 
     @Override
     public Packet<ClientPlayPacketListener> createSpawnPacket() {
-        if (((PaintingEntityMixinAccessor) this.painting).easy_painter_master$getCustomVariant() != null) {
-            System.out.println(1);
-            return new EntitySpawnS2CPacket(((ItemFrameEntity)this), 0, this.getDecorationBlockPos());
+        if (((PaintingEntityAccessor) this.painting).easy_painter_master$getCustomVariant() != null) {
+            return new EntitySpawnS2CPacket(this, 0, this.getDecorationBlockPos());
         }
-        System.out.println(2);
         return new EntitiesDestroyS2CPacket(this.getId());
     }
 

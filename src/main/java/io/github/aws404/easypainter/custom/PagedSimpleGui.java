@@ -36,7 +36,7 @@ public class PagedSimpleGui extends SimpleGui {
         GuiElementBuilder builder = new GuiElementBuilder(Items.MAGENTA_GLAZED_TERRACOTTA)
                 .setName(Text.translatable("screen.easy_painter.previous_page").formatted(Formatting.YELLOW))
                 .setCallback((index, type1, action) -> {
-                    this.page = (int) Math.clamp(this.page - 1, 1, Math.ceil(this.slots.size() / maxItemsPerPage));
+                    this.page = (int) Math.clamp(this.page - 1, 1, Math.ceil((double) this.slots.size() / maxItemsPerPage));
                     updatePage();
                 });
         this.setSlot(45, builder);
@@ -44,7 +44,7 @@ public class PagedSimpleGui extends SimpleGui {
         GuiElementBuilder builder2 = new GuiElementBuilder(Items.MAGENTA_GLAZED_TERRACOTTA)
                 .setName(Text.translatable("screen.easy_painter.next_page").formatted(Formatting.YELLOW))
                 .setCallback((index, type1, action) -> {
-                    this.page = (int) Math.clamp(this.page + 1, 1, Math.ceil(this.slots.size() / maxItemsPerPage));
+                    this.page = (int) Math.clamp(this.page + 1, 1, Math.ceil((double) this.slots.size() / maxItemsPerPage));
                     updatePage();
                 });
         this.setSlot(53, builder2);
@@ -57,25 +57,19 @@ public class PagedSimpleGui extends SimpleGui {
             this.clearSlot(i);
         }
 
-        System.out.println(this.page);
-        int startIndex = this.page * maxItemsPerPage;
+        System.out.println("p: " + this.page);
+        System.out.println("s: " + this.slots.size());
+        int startIndex = (this.page - 1) * maxItemsPerPage;
         for (int i = startIndex; i < startIndex + maxItemsPerPage; i++) {
             if (i >= this.slots.size()) break;
             GuiElementInterface slot = this.slots.get(i);
-           // if (slot == null) break;
             this.setSlot(this.getFirstEmptySlot(), slot);
         }
     }
 
     @Override
     public void addSlot(GuiElementBuilderInterface<?> element) {
-        int slotIndex = this.getFirstEmptySlot();
-
-        int height = this.getHeight(); System.out.println((Math.ceil((double) slotIndex / 9)));
-        if (Math.ceil((double) slotIndex / 9) == height) return;;
-
         this.slots.add(element.build());
         updatePage();
-        //super.addSlot(element);
     }
 }

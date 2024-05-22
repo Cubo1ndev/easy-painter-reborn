@@ -5,14 +5,15 @@
   "compatibilityLevel": "JAVA_16",
   "server": [
     "AbstractDecorationEntityAccessor",
-    "PaintingEntityMixin",
     "MapStateAccessor",
+    "PaintingEntityMixin",
     "SeverResourceManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "mixins": [
-    "DecorationItemMixin"
+    "DecorationItemMixin",
+    "ItemFrameEntityAccessor"
   ]
 }

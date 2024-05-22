@@ -1,12 +1,12 @@
-package io.github.aws404.easypainter.mixin;
+package io.github.aws404.easypainter;
 
+import io.github.aws404.easypainter.custom.CustomFrameEntity;
 import io.github.aws404.easypainter.custom.CustomMotivesManager;
 
-//@Mixin(PaintingEntityMixin.class)
-public interface PaintingEntityMixinAccessor {
-    //@Accessor
+public interface PaintingEntityAccessor {
     CustomMotivesManager.CustomMotive easy_painter_master$getCustomVariant();
 
-    //@Accessor
     void easy_painter_master$setCustomVariant(CustomMotivesManager.CustomMotive motive);
+
+    void easy_painter_master$addCustomPaintingFrame(CustomFrameEntity entity, int i);
 }
