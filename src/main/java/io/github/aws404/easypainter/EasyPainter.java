@@ -1,18 +1,13 @@
 package io.github.aws404.easypainter;
 
-import com.mojang.datafixers.types.templates.Tag;
 import eu.pb4.polymer.core.api.entity.PolymerEntityUtils;
 import io.github.aws404.easypainter.command.EasyPainterCommand;
 import io.github.aws404.easypainter.custom.CustomFrameEntity;
 import io.github.aws404.easypainter.custom.CustomMotivesManager;
-import io.github.aws404.easypainter.mixin.ItemFrameEntityAccessor;
-import io.github.aws404.easypainter.mixin.PaintingEntityMixin;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
-import net.fabricmc.fabric.impl.tag.convention.v2.TagRegistration;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.block.AbstractRedstoneGateBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;

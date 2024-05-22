@@ -1,7 +1,5 @@
 package io.github.aws404.easypainter.custom;
 
-import com.google.common.base.Preconditions;
-
 public class CustomMapColor {
     private static final CustomMapColor[] COLORS = new CustomMapColor[64];
     public static final CustomMapColor CLEAR = new CustomMapColor(0, 0);

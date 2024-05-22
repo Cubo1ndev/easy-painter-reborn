@@ -4,8 +4,6 @@ import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.elements.GuiElementBuilderInterface;
 import eu.pb4.sgui.api.elements.GuiElementInterface;
 import eu.pb4.sgui.api.gui.SimpleGui;
-import io.github.aws404.easypainter.EasyPainter;
-import io.github.aws404.easypainter.SelectionGui;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandlerType;

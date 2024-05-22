@@ -1,6 +1,5 @@
 package io.github.aws404.easypainter.custom;
 
-import com.jcraft.jorbis.Block;
 import eu.pb4.polymer.core.api.entity.PolymerEntity;
 import io.github.aws404.easypainter.EasyPainter;
 import io.github.aws404.easypainter.PaintingEntityAccessor;
