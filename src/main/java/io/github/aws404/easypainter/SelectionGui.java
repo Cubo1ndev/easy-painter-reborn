@@ -62,7 +62,7 @@ public class SelectionGui extends PagedSimpleGui {
                     });
             builder.setComponent(DataComponentTypes.CUSTOM_MODEL_DATA, customModelData);
 
-            if (possibility == entity.getVariant()) {
+            if (entity.getVariant().value() == possibility) {
                 builder.addLoreLine(Text.literal(""));
                 builder.addLoreLine(Text.translatable("screen.easy_painter.currently_selected").formatted(Formatting.GRAY));
                 builder.glow();
