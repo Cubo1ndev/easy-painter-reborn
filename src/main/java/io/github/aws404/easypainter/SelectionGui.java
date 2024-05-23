@@ -1,11 +1,9 @@
 package io.github.aws404.easypainter;
 
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
-import eu.pb4.sgui.api.elements.GuiElementInterface;
 import io.github.aws404.easypainter.custom.CustomMotivesManager;
 import io.github.aws404.easypainter.custom.PagedSimpleGui;
 import io.github.aws404.easypainter.mixin.AbstractDecorationEntityAccessor;
-import io.github.aws404.easypainter.mixin.PaintingEntityMixin;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.CustomModelDataComponent;
 import net.minecraft.entity.decoration.painting.PaintingEntity;
@@ -36,7 +34,7 @@ public class SelectionGui extends PagedSimpleGui {
         for (PaintingVariant possibility : motives) {
             Identifier id = Registries.PAINTING_VARIANT.getId(possibility);
             CustomModelDataComponent customModelData = CustomModelDataComponent.DEFAULT;
-            boolean isSelected = false;
+            boolean isSelected;
             if (possibility instanceof CustomMotivesManager.CustomMotive) {
                 Identifier newId = EasyPainter.customMotivesManager.getMotiveId((CustomMotivesManager.CustomMotive) possibility);
                 if (newId != null) {

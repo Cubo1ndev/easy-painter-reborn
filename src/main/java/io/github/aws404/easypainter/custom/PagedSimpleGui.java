@@ -21,8 +21,8 @@ public class PagedSimpleGui extends SimpleGui {
 
     private final int maxItemsPerPage = 9 * 5;
 
-    private GuiElementInterface previousPage;
-    private GuiElementInterface nextPage;
+    private final GuiElementInterface previousPage;
+    private final GuiElementInterface nextPage;
 
     /**
      * Constructs a new simple container gui for the supplied player.
