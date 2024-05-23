@@ -1,9 +1,11 @@
 package io.github.aws404.easypainter;
 
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
+import eu.pb4.sgui.api.elements.GuiElementInterface;
 import io.github.aws404.easypainter.custom.CustomMotivesManager;
 import io.github.aws404.easypainter.custom.PagedSimpleGui;
 import io.github.aws404.easypainter.mixin.AbstractDecorationEntityAccessor;
+import io.github.aws404.easypainter.mixin.PaintingEntityMixin;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.CustomModelDataComponent;
 import net.minecraft.entity.decoration.painting.PaintingEntity;
@@ -18,10 +20,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class SelectionGui extends PagedSimpleGui {
@@ -33,9 +32,11 @@ public class SelectionGui extends PagedSimpleGui {
         this.entity = entity;
         this.setTitle(Text.translatable("screen.easy_painter.title"));
 
+        ArrayList<GuiElementBuilder> elements = new ArrayList<>();
         for (PaintingVariant possibility : motives) {
             Identifier id = Registries.PAINTING_VARIANT.getId(possibility);
             CustomModelDataComponent customModelData = CustomModelDataComponent.DEFAULT;
+            boolean isSelected = false;
             if (possibility instanceof CustomMotivesManager.CustomMotive) {
                 Identifier newId = EasyPainter.customMotivesManager.getMotiveId((CustomMotivesManager.CustomMotive) possibility);
                 if (newId != null) {
@@ -43,6 +44,13 @@ public class SelectionGui extends PagedSimpleGui {
                 }
 
                 customModelData = new CustomModelDataComponent(((CustomMotivesManager.CustomMotive) possibility).state.customModelData);
+            }
+
+            CustomMotivesManager.CustomMotive motive = ((PaintingEntityAccessor) entity).easy_painter_master$getCustomVariant();
+            if (motive != null) {
+                isSelected = motive == possibility;
+            } else {
+                isSelected = entity.getVariant().value() == possibility;
             }
 
             GuiElementBuilder builder = new GuiElementBuilder(Items.PAINTING)
@@ -62,15 +70,18 @@ public class SelectionGui extends PagedSimpleGui {
                     });
             builder.setComponent(DataComponentTypes.CUSTOM_MODEL_DATA, customModelData);
 
-            if (entity.getVariant().value() == possibility) {
+            if (isSelected) {
                 builder.addLoreLine(Text.literal(""));
                 builder.addLoreLine(Text.translatable("screen.easy_painter.currently_selected").formatted(Formatting.GRAY));
                 builder.glow();
             }
 
-            this.addSlot(builder);
+            elements.add(builder);
         }
+
+        this.addSlots(elements);
     }
+
 
     private void changePainting(PaintingVariant motive) {
         if (motive instanceof CustomMotivesManager.CustomMotive) {

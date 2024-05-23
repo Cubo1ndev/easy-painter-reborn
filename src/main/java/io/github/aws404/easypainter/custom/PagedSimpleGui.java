@@ -5,6 +5,7 @@ import eu.pb4.sgui.api.elements.GuiElementBuilderInterface;
 import eu.pb4.sgui.api.elements.GuiElementInterface;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.CustomModelDataComponent;
 import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -20,6 +21,9 @@ public class PagedSimpleGui extends SimpleGui {
 
     private final int maxItemsPerPage = 9 * 5;
 
+    private GuiElementInterface previousPage;
+    private GuiElementInterface nextPage;
+
     /**
      * Constructs a new simple container gui for the supplied player.
      *
@@ -32,27 +36,37 @@ public class PagedSimpleGui extends SimpleGui {
 
         this.slots = new ArrayList<>();
 
-        GuiElementBuilder builder = new GuiElementBuilder(Items.MAGENTA_GLAZED_TERRACOTTA)
+        GuiElementBuilder builder = new GuiElementBuilder(Items.STRUCTURE_VOID)
+                .setComponent(DataComponentTypes.CUSTOM_MODEL_DATA, new CustomModelDataComponent(1))
                 .setName(Text.translatable("screen.easy_painter.previous_page").formatted(Formatting.YELLOW))
                 .setCallback((index, type1, action) -> {
-                    this.page = (int) Math.clamp(this.page - 1, 0, Math.ceil((double) this.slots.size() / maxItemsPerPage));
-                    updatePage();
+                    this.page = Math.clamp(this.page - 1, 0, this.getMaxPages());
+                    this.updatePage();
                 });
-        this.setSlot(45, builder);
+        this.setSlot(48, builder);
 
-        GuiElementBuilder builder2 = new GuiElementBuilder(Items.YELLOW_CANDLE)
+        GuiElementBuilder builder2 = new GuiElementBuilder(Items.STRUCTURE_VOID)
+                .setComponent(DataComponentTypes.CUSTOM_MODEL_DATA, new CustomModelDataComponent(2))
                 .setName(Text.translatable("screen.easy_painter.page_1").formatted(Formatting.YELLOW));
         this.setSlot(49, builder2);
 
-        GuiElementBuilder builder3 = new GuiElementBuilder(Items.MAGENTA_GLAZED_TERRACOTTA)
+        GuiElementBuilder builder3 = new GuiElementBuilder(Items.STRUCTURE_VOID)
+                .setComponent(DataComponentTypes.CUSTOM_MODEL_DATA, new CustomModelDataComponent(3))
                 .setName(Text.translatable("screen.easy_painter.next_page").formatted(Formatting.YELLOW))
                 .setCallback((index, type1, action) -> {
-                    this.page = (int) Math.clamp(this.page + 1, 0, Math.ceil((double) this.slots.size() / maxItemsPerPage));
-                    updatePage();
+                    this.page = Math.clamp(this.page + 1, 0, this.getMaxPages());
+                    this.updatePage();
                 });
-        this.setSlot(53, builder3);
+        this.setSlot(50, builder3);
 
-        updatePage();
+        previousPage = this.getSlot(48);
+        nextPage = this.getSlot(50);
+
+        this.updatePage();
+    }
+
+    private int getMaxPages() {
+        return (int) Math.ceil((double) this.slots.size() / maxItemsPerPage);
     }
 
     private void updatePage() {
@@ -72,11 +86,34 @@ public class PagedSimpleGui extends SimpleGui {
             int realPage = this.page + 1;
             element.getItemStack().set(DataComponentTypes.ITEM_NAME, Text.translatable("screen.easy_painter.page_" + (realPage)).formatted(Formatting.YELLOW));
         }
+
+        int maxPages = this.getMaxPages() - 1;
+        if (maxPages != 0) {
+            if (this.page == 0) {
+                this.clearSlot(48);
+                this.setSlot(50, nextPage);
+            } else if (this.page == maxPages) {
+                this.setSlot(48, previousPage);
+                this.clearSlot(50);
+            } else {
+                this.setSlot(48, previousPage);
+                this.setSlot(50, nextPage);
+            }
+        } else {
+            this.clearSlot(48);
+            this.clearSlot(50);
+        }
     }
 
     @Override
     public void addSlot(GuiElementBuilderInterface<?> element) {
         this.slots.add(element.build());
-        updatePage();
+    }
+
+    public void addSlots(ArrayList<GuiElementBuilder> elements) {
+        for (GuiElementBuilder element : elements) {
+            this.addSlot(element);
+        }
+        this.updatePage();
     }
 }
