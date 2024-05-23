@@ -19,6 +19,8 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -42,6 +44,8 @@ public class EasyPainter implements ModInitializer {
     public static final EntityType<CustomFrameEntity> CUSTOM_ITEM_FRAME_ENTITY_TYPE = Registry.register(Registries.ENTITY_TYPE, new Identifier("easy_painter", "custom_item_frame"), EntityType.Builder.<CustomFrameEntity>create(CustomFrameEntity::new, SpawnGroup.MISC).disableSaving().disableSummon().makeFireImmune().build());
 	public static CustomMotivesManager customMotivesManager;
 
+    private static ServerWorld world;
+
     @Override
     public void onInitialize() {
         LOGGER.info("Starting Easy Painter (Version {})", FabricLoader.getInstance().getModContainer("easy_painter").orElseThrow(() -> new IllegalStateException("initialising unloaded mod")).getMetadata().getVersion().getFriendlyString());
@@ -51,10 +55,15 @@ public class EasyPainter implements ModInitializer {
         PolymerEntityUtils.registerType(CUSTOM_ITEM_FRAME_ENTITY_TYPE);
         ServerWorldEvents.LOAD.register((server, world) -> {
             if (world.getRegistryKey() == World.OVERWORLD) {
+                EasyPainter.world = world;
                 EasyPainter.customMotivesManager = new CustomMotivesManager(world.getPersistentStateManager());
-                EasyPainter.customMotivesManager.reload(world, server.getResourceManager());
+                reloadSources(server.getResourceManager());
             }
         });
+    }
+
+    public static void reloadSources(ResourceManager manager) {
+        EasyPainter.customMotivesManager.reload(world, manager);
     }
 
     /**

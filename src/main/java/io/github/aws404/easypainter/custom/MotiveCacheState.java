@@ -88,6 +88,7 @@ public class MotiveCacheState extends PersistentState {
 
             int blockWidth = data.get("blockWidth").getAsInt();
             int blockHeight = data.get("blockHeight").getAsInt();
+            int customModelData = data.has("CustomModelData") ? data.get("CustomModelData").getAsInt() : 0;
             String imageName = data.has("image") ? "painting/" + data.get("image").getAsString() + ".png" : resource.getPath().substring(0, resource.getPath().indexOf(".json")) + "_image.png";
             ImageRenderer.DitherMode ditherMode = data.has("ditherMode") ? ImageRenderer.DitherMode.fromString(data.get("ditherMode").getAsString()) : ImageRenderer.DitherMode.NONE;
 
@@ -110,7 +111,7 @@ public class MotiveCacheState extends PersistentState {
                 }
             }
 
-            Entry entry = new Entry(motiveId, blockWidth, blockHeight, mapIds);
+            Entry entry = new Entry(motiveId, blockWidth, blockHeight, customModelData, mapIds);
             entries.put(motiveId, entry);
             this.markDirty();
             return entry;
@@ -151,13 +152,15 @@ public class MotiveCacheState extends PersistentState {
         private final Identifier id;
         public final int blockWidth;
         public final int blockHeight;
+        public final int customModelData;
         public final int[][] mapIds;
 
-        public Entry(Identifier id, int blockWidth, int blockHeight, int[][] mapIds) {
+        public Entry(Identifier id, int blockWidth, int blockHeight, int customModelData, int[][] mapIds) {
             this.id = id;
             this.blockWidth = blockWidth;
             this.blockHeight = blockHeight;
             this.mapIds = mapIds;
+            this.customModelData = customModelData;
         }
 
         public Identifier getId() {
@@ -168,6 +171,7 @@ public class MotiveCacheState extends PersistentState {
             nbt.putString("id", id.toString());
             nbt.putInt("blockWidth", blockWidth);
             nbt.putInt("blockHeight", blockHeight);
+            nbt.putInt("CustomModelData", customModelData);
 
             NbtList list = new NbtList();
             for (int[] mapId : mapIds) {
@@ -189,7 +193,7 @@ public class MotiveCacheState extends PersistentState {
                 }
             }
 
-            return new Entry(new Identifier(nbt.getString("id")), nbt.getInt("blockWidth"), nbt.getInt("blockHeight"), mapIds);
+            return new Entry(new Identifier(nbt.getString("id")), nbt.getInt("blockWidth"), nbt.getInt("blockHeight"), nbt.getInt("CustomModelData"), mapIds);
         }
     }
 }

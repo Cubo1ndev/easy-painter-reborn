@@ -4,8 +4,11 @@ import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import io.github.aws404.easypainter.custom.CustomMotivesManager;
 import io.github.aws404.easypainter.custom.PagedSimpleGui;
 import io.github.aws404.easypainter.mixin.AbstractDecorationEntityAccessor;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.CustomModelDataComponent;
 import net.minecraft.entity.decoration.painting.PaintingEntity;
 import net.minecraft.entity.decoration.painting.PaintingVariant;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket;
@@ -16,6 +19,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
+import javax.xml.crypto.Data;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -33,11 +37,14 @@ public class SelectionGui extends PagedSimpleGui {
 
         for (PaintingVariant possibility : motives) {
             Identifier id = Registries.PAINTING_VARIANT.getId(possibility);
+            CustomModelDataComponent customModelData = CustomModelDataComponent.DEFAULT;
             if (possibility instanceof CustomMotivesManager.CustomMotive) {
                 Identifier newId = EasyPainter.customMotivesManager.getMotiveId((CustomMotivesManager.CustomMotive) possibility);
                 if (newId != null) {
                     id = newId;
                 }
+
+                customModelData = new CustomModelDataComponent(((CustomMotivesManager.CustomMotive) possibility).state.customModelData);
             }
 
             GuiElementBuilder builder = new GuiElementBuilder(Items.PAINTING)
@@ -55,6 +62,7 @@ public class SelectionGui extends PagedSimpleGui {
                         this.close();
                         this.changePainting(possibility);
                     });
+            builder.setComponent(DataComponentTypes.CUSTOM_MODEL_DATA, customModelData);
 
             if (possibility == entity.getVariant()) {
                 builder.addLoreLine(Text.literal(""));
@@ -72,6 +80,7 @@ public class SelectionGui extends PagedSimpleGui {
         } else {
             Optional<RegistryEntry.Reference<PaintingVariant>> variant = Registries.PAINTING_VARIANT.getEntry(Registries.PAINTING_VARIANT.getId(motive));
             if (variant.isEmpty()) return;
+            ((PaintingEntityAccessor) this.entity).easy_painter_master$setCustomVariant(null);
             this.entity.setVariant(variant.get());
         }
 
