@@ -104,8 +104,8 @@ public class EasyPainter implements ModInitializer {
         }
 
         for (Entity element : entity.getWorld().getOtherEntities(entity, getBoundingBox(entity, motive, facing, rotated, widthPixels, heightPixels))) {
+            //noinspection StatementWithEmptyBody
             if ((element instanceof PaintingEntity) && (element == entity)) {
-
             } else if (element instanceof CustomFrameEntity) {
                 if (!((PaintingEntityAccessor) entity).easy_painter_master$isEntityInCustonPaintingFrameList((CustomFrameEntity) element)) {
                     return false;

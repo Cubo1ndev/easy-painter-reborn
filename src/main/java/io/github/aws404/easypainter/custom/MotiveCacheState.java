@@ -117,6 +117,7 @@ public class MotiveCacheState extends PersistentState {
             return entry;
         } catch (IOException e) {
             EasyPainter.LOGGER.error("Error loading the custom painting '{}'. Error: ", motiveId);
+            //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
 

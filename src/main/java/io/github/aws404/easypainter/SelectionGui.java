@@ -8,7 +8,6 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.CustomModelDataComponent;
 import net.minecraft.entity.decoration.painting.PaintingEntity;
 import net.minecraft.entity.decoration.painting.PaintingVariant;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket;
@@ -19,7 +18,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
-import javax.xml.crypto.Data;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
