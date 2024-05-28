@@ -66,18 +66,6 @@ public class MotiveCacheState extends PersistentState {
         return nbt;
     }
 
-    public int getNextMapId() {
-        return currentMapId.getAndAdd(1);
-    }
-
-    /*public static MotiveCacheState readNbt(NbtCompound nbt) {
-        int mapId = nbt.getInt("currentMapId");
-        nbt.remove("currentMapId");
-        HashMap<Identifier, Entry> entries = new HashMap<>();
-        nbt.getKeys().stream().map(s -> Entry.fromNbt(nbt.getCompound(s))).forEach(entry -> entries.put(entry.id, entry));
-        return new MotiveCacheState(entries, mapId);
-    }*/
-
     public Set<Identifier> getKeys() {
         return this.entries.keySet();
     }
@@ -96,7 +84,7 @@ public class MotiveCacheState extends PersistentState {
         this.markDirty();
     }
 
-    public Entry getOrCreateEntry(World world, Identifier resource, Gson gson, ResourceManager manager, PersistentStateManager stateManager) {
+    public Entry getOrCreateEntry(World world, Identifier resource, Gson gson, ResourceManager manager) {
         Identifier motiveId = new Identifier(resource.getNamespace(), resource.getPath().substring(9, resource.getPath().indexOf(".json")));
 
         if (this.entries.containsKey(motiveId)) {

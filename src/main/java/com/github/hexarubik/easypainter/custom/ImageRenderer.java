@@ -4,7 +4,6 @@ import com.github.hexarubik.easypainter.mixin.MapStateAccessor;
 import net.minecraft.component.type.MapIdComponent;
 import net.minecraft.item.map.MapState;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.PersistentStateManager;
 import net.minecraft.world.World;
 
 import java.awt.*;

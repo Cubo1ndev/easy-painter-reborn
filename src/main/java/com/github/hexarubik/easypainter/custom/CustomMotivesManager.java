@@ -52,7 +52,7 @@ public class CustomMotivesManager {
 
         AtomicInteger id = new AtomicInteger();
         keySet.stream().filter(identifier -> identifier.getPath().contains(".json")).forEach(identifier -> {
-            MotiveCacheState.Entry motiveCache = paintingStorage.getOrCreateEntry(world, identifier, GSON, manager, this.stateManager);
+            MotiveCacheState.Entry motiveCache = paintingStorage.getOrCreateEntry(world, identifier, GSON, manager);
             CustomMotivesManager.registerOrReplace(motiveCache.getId(), new CustomMotive(motiveCache));
             id.incrementAndGet();
         });

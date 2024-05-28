@@ -1,6 +1,5 @@
 package com.github.hexarubik.easypainter;
 
-import com.github.hexarubik.easypainter.custom.CustomFrameEntity;
 import com.github.hexarubik.easypainter.custom.CustomMotivesManager;
 
 public interface PaintingEntityAccessor {
