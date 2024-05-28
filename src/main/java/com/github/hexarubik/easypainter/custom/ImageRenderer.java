@@ -1,6 +1,6 @@
-package io.github.aws404.easypainter.custom;
+package com.github.hexarubik.easypainter.custom;
 
-import io.github.aws404.easypainter.mixin.MapStateAccessor;
+import com.github.hexarubik.easypainter.mixin.MapStateAccessor;
 import net.minecraft.component.type.MapIdComponent;
 import net.minecraft.item.map.MapState;
 import net.minecraft.util.math.MathHelper;
@@ -15,6 +15,7 @@ import java.util.Objects;
 
 /**
  * Credit to the Image2Map Mod for the base of this code!
+ *
  * @author TheEssem
  * @see <a href="https://github.com/TheEssem/Image2Map/blob/master/src/main/java/space/essem/image2map/renderer/MapRenderer.java">Original Source</a>
  */
@@ -59,12 +60,13 @@ public class ImageRenderer {
 
     private static double[] applyShade(double[] color, int ind) {
         double coeff = shadeCoeffs[ind];
-        return new double[] { color[0] * coeff, color[1] * coeff, color[2] * coeff };
+        return new double[]{color[0] * coeff, color[1] * coeff, color[2] * coeff};
     }
 
     private static int getNextPaintingId(PersistentStateManager stateManager) {
         return MotiveCacheState.getOrCreate(stateManager).getNextMapId();
     }
+
     private static Color mapColorToRGBColor(CustomMapColor[] colors, int color) {
         Color mcColor = new Color(colors[color >> 2].color);
         double[] mcColorVec = {
@@ -73,11 +75,9 @@ public class ImageRenderer {
                 (double) mcColor.getBlue()
         };
         double coeff = shadeCoeffs[color & 3];
-        return new Color((int)(mcColorVec[0] * coeff), (int)(mcColorVec[1] * coeff), (int)(mcColorVec[2] * coeff));
+        return new Color((int) (mcColorVec[0] * coeff), (int) (mcColorVec[1] * coeff), (int) (mcColorVec[2] * coeff));
     }
 
-    private record NegatableColor(int r, int g, int b) {
-    }
     private static int floydDither(CustomMapColor[] mapColors, int[][] pixels, int x, int y, Color imageColor) {
         // double[] imageVec = { (double) imageColor.getRed() / 255.0, (double) imageColor.getGreen() / 255.0,
         //         (double) imageColor.getBlue() / 255.0 };
@@ -109,22 +109,22 @@ public class ImageRenderer {
     }
 
     private static int applyError(Color pixelColor, NegatableColor error, double quantConst) {
-        int pR = MathHelper.clamp(pixelColor.getRed() + (int)((double)error.r * quantConst), 0, 255);
-        int pG = MathHelper.clamp(pixelColor.getGreen() + (int)((double)error.g * quantConst), 0, 255);
-        int pB = MathHelper.clamp(pixelColor.getBlue() + (int)((double)error.b * quantConst), 0, 255);
+        int pR = MathHelper.clamp(pixelColor.getRed() + (int) ((double) error.r * quantConst), 0, 255);
+        int pG = MathHelper.clamp(pixelColor.getGreen() + (int) ((double) error.g * quantConst), 0, 255);
+        int pB = MathHelper.clamp(pixelColor.getBlue() + (int) ((double) error.b * quantConst), 0, 255);
 
         return new Color(pR, pG, pB, pixelColor.getAlpha()).getRGB();
     }
 
     private static int nearestColor(CustomMapColor[] colors, Color imageColor) {
-        double[] imageVec = { (double) imageColor.getRed() / 255.0, (double) imageColor.getGreen() / 255.0, (double) imageColor.getBlue() / 255.0 };
+        double[] imageVec = {(double) imageColor.getRed() / 255.0, (double) imageColor.getGreen() / 255.0, (double) imageColor.getBlue() / 255.0};
         int best_color = 0;
         double lowest_distance = 10000;
 
         for (int k = 0; k < colors.length; k++) {
             Color mcColor = new Color(colors[k].color);
-            double[] mcColorVec = { (double) mcColor.getRed() / 255.0, (double) mcColor.getGreen() / 255.0,
-                    (double) mcColor.getBlue() / 255.0 };
+            double[] mcColorVec = {(double) mcColor.getRed() / 255.0, (double) mcColor.getGreen() / 255.0,
+                    (double) mcColor.getBlue() / 255.0};
             for (int shadeInd = 0; shadeInd < shadeCoeffs.length; shadeInd++) {
                 double distance = distance(imageVec, applyShade(mcColorVec, shadeInd));
                 if (distance < lowest_distance) {
@@ -186,5 +186,8 @@ public class ImageRenderer {
                 return DitherMode.FLOYD;
             throw new IllegalArgumentException("invalid dither mode");
         }
+    }
+
+    private record NegatableColor(int r, int g, int b) {
     }
 }

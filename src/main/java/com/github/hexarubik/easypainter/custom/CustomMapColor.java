@@ -1,7 +1,6 @@
-package io.github.aws404.easypainter.custom;
+package com.github.hexarubik.easypainter.custom;
 
 public class CustomMapColor {
-    private static final CustomMapColor[] COLORS = new CustomMapColor[64];
     public static final CustomMapColor CLEAR = new CustomMapColor(0, 0);
     public static final CustomMapColor PALE_GREEN = new CustomMapColor(1, 8368696);
     public static final CustomMapColor PALE_YELLOW = new CustomMapColor(2, 16247203);
@@ -64,6 +63,7 @@ public class CustomMapColor {
     public static final CustomMapColor DEEPSLATE_GRAY = new CustomMapColor(59, 0x646464);
     public static final CustomMapColor RAW_IRON_PINK = new CustomMapColor(60, 14200723);
     public static final CustomMapColor LICHEN_GREEN = new CustomMapColor(61, 8365974);
+    private static final CustomMapColor[] COLORS = new CustomMapColor[64];
     public final int color;
     public final int id;
 

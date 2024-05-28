@@ -1,13 +1,12 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "io.github.aws404.easypainter.mixin",
+  "package": "com.github.hexarubik.easypainter.mixin",
   "compatibilityLevel": "JAVA_16",
   "server": [
     "AbstractDecorationEntityAccessor",
     "MapStateAccessor",
-    "PaintingEntityMixin",
-    "SeverResourceManagerMixin"
+    "PaintingEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

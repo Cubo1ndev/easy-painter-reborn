@@ -1,8 +1,8 @@
-package io.github.aws404.easypainter.custom;
+package com.github.hexarubik.easypainter.custom;
 
+import com.github.hexarubik.easypainter.EasyPainter;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import io.github.aws404.easypainter.EasyPainter;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtIntArray;
@@ -40,6 +40,22 @@ public class MotiveCacheState extends PersistentState {
         this(new HashMap<>(), 0);
     }
 
+    public static MotiveCacheState getOrCreate(PersistentStateManager manager) {
+        return manager.getOrCreate(getPersistentStateType(), "custom_motives");
+    }
+
+    public static PersistentState.Type<MotiveCacheState> getPersistentStateType() {
+        return new PersistentState.Type<>(MotiveCacheState::new, MotiveCacheState::fromNbt, null);
+    }
+
+    public static MotiveCacheState fromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+        int mapId = nbt.getInt("currentMapId");
+        nbt.remove("currentMapId");
+        HashMap<Identifier, Entry> entries = new HashMap<>();
+        nbt.getKeys().stream().map(s -> Entry.fromNbt(nbt.getCompound(s))).forEach(entry -> entries.put(entry.id, entry));
+        return new MotiveCacheState(entries, mapId);
+    }
+
     @Override
     public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
         nbt.putInt("currentMapId", currentMapId.get());
@@ -53,6 +69,14 @@ public class MotiveCacheState extends PersistentState {
     public int getNextMapId() {
         return currentMapId.getAndAdd(1);
     }
+
+    /*public static MotiveCacheState readNbt(NbtCompound nbt) {
+        int mapId = nbt.getInt("currentMapId");
+        nbt.remove("currentMapId");
+        HashMap<Identifier, Entry> entries = new HashMap<>();
+        nbt.getKeys().stream().map(s -> Entry.fromNbt(nbt.getCompound(s))).forEach(entry -> entries.put(entry.id, entry));
+        return new MotiveCacheState(entries, mapId);
+    }*/
 
     public Set<Identifier> getKeys() {
         return this.entries.keySet();
@@ -124,37 +148,13 @@ public class MotiveCacheState extends PersistentState {
         return null;
     }
 
-    /*public static MotiveCacheState readNbt(NbtCompound nbt) {
-        int mapId = nbt.getInt("currentMapId");
-        nbt.remove("currentMapId");
-        HashMap<Identifier, Entry> entries = new HashMap<>();
-        nbt.getKeys().stream().map(s -> Entry.fromNbt(nbt.getCompound(s))).forEach(entry -> entries.put(entry.id, entry));
-        return new MotiveCacheState(entries, mapId);
-    }*/
-
-    public static MotiveCacheState getOrCreate(PersistentStateManager manager) {
-        return manager.getOrCreate(getPersistentStateType(), "custom_motives");
-    }
-
-    public static PersistentState.Type<MotiveCacheState> getPersistentStateType() {
-        return new PersistentState.Type<>(MotiveCacheState::new, MotiveCacheState::fromNbt, null);
-    }
-
-    public static MotiveCacheState fromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        int mapId = nbt.getInt("currentMapId");
-        nbt.remove("currentMapId");
-        HashMap<Identifier, Entry> entries = new HashMap<>();
-        nbt.getKeys().stream().map(s -> Entry.fromNbt(nbt.getCompound(s))).forEach(entry -> entries.put(entry.id, entry));
-        return new MotiveCacheState(entries, mapId);
-    }
-
     public static class Entry {
 
-        private final Identifier id;
         public final int blockWidth;
         public final int blockHeight;
         public final int customModelData;
         public final int[][] mapIds;
+        private final Identifier id;
 
         public Entry(Identifier id, int blockWidth, int blockHeight, int customModelData, int[][] mapIds) {
             this.id = id;
@@ -162,6 +162,19 @@ public class MotiveCacheState extends PersistentState {
             this.blockHeight = blockHeight;
             this.mapIds = mapIds;
             this.customModelData = customModelData;
+        }
+
+        public static Entry fromNbt(NbtCompound nbt) {
+            int[][] mapIds = new int[nbt.getInt("blockWidth")][nbt.getInt("blockHeight")];
+            NbtList list = nbt.getList("mapIds", NbtElement.INT_ARRAY_TYPE);
+            for (int i = 0; i < list.size(); i++) {
+                NbtIntArray arr = (NbtIntArray) list.get(i);
+                for (int i1 = 0; i1 < arr.size(); i1++) {
+                    mapIds[i][i1] = arr.get(i1).intValue();
+                }
+            }
+
+            return new Entry(new Identifier(nbt.getString("id")), nbt.getInt("blockWidth"), nbt.getInt("blockHeight"), nbt.getInt("CustomModelData"), mapIds);
         }
 
         public Identifier getId() {
@@ -182,19 +195,6 @@ public class MotiveCacheState extends PersistentState {
             nbt.put("mapIds", list);
 
             return nbt;
-        }
-
-        public static Entry fromNbt(NbtCompound nbt) {
-            int[][] mapIds = new int[nbt.getInt("blockWidth")][nbt.getInt("blockHeight")];
-            NbtList list = nbt.getList("mapIds", NbtElement.INT_ARRAY_TYPE);
-            for (int i = 0; i < list.size(); i++) {
-                NbtIntArray arr = (NbtIntArray) list.get(i);
-                for (int i1 = 0; i1 < arr.size(); i1++) {
-                    mapIds[i][i1] = arr.get(i1).intValue();
-                }
-            }
-
-            return new Entry(new Identifier(nbt.getString("id")), nbt.getInt("blockWidth"), nbt.getInt("blockHeight"), nbt.getInt("CustomModelData"), mapIds);
         }
     }
 }

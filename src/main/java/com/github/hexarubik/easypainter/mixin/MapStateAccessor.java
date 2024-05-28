@@ -1,4 +1,4 @@
-package io.github.aws404.easypainter.mixin;
+package com.github.hexarubik.easypainter.mixin;
 
 import net.minecraft.item.map.MapState;
 import org.spongepowered.asm.mixin.Mixin;

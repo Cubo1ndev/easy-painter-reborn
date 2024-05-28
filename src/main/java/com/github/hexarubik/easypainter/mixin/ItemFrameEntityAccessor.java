@@ -1,4 +1,4 @@
-package io.github.aws404.easypainter.mixin;
+package com.github.hexarubik.easypainter.mixin;
 
 import net.minecraft.entity.decoration.ItemFrameEntity;
 import org.spongepowered.asm.mixin.Mixin;

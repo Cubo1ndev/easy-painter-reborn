@@ -1,9 +1,9 @@
-package io.github.aws404.easypainter;
+package com.github.hexarubik.easypainter;
 
+import com.github.hexarubik.easypainter.custom.CustomMotivesManager;
+import com.github.hexarubik.easypainter.mixin.AbstractDecorationEntityAccessor;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
-import io.github.aws404.easypainter.custom.CustomMotivesManager;
-import io.github.aws404.easypainter.custom.PagedSimpleGui;
-import io.github.aws404.easypainter.mixin.AbstractDecorationEntityAccessor;
+import com.github.hexarubik.easypainter.custom.PagedSimpleGui;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.CustomModelDataComponent;
 import net.minecraft.entity.decoration.painting.PaintingEntity;
@@ -80,6 +80,12 @@ public class SelectionGui extends PagedSimpleGui {
         this.addSlots(elements);
     }
 
+    public static SelectionGui createGui(PaintingEntity entity, ServerPlayerEntity player) {
+        List<PaintingVariant> motives1 = Registries.PAINTING_VARIANT.stream().filter(motive -> EasyPainter.canPaintingAttach(entity, motive)).sorted(Comparator.comparingInt(o -> o.getHeight() * o.getWidth())).toList();
+        List<CustomMotivesManager.CustomMotive> motives2 = EasyPainter.customMotivesManager.getMotives().values().stream().filter(motive -> EasyPainter.canPaintingAttach(entity, motive)).sorted(Comparator.comparingInt(o -> o.getHeight() * o.getWidth())).toList();
+        List<PaintingVariant> motives = Stream.concat(motives1.stream(), motives2.stream()).toList();
+        return new SelectionGui(entity, motives, player);
+    }
 
     private void changePainting(PaintingVariant motive) {
         if (motive instanceof CustomMotivesManager.CustomMotive) {
@@ -97,12 +103,5 @@ public class SelectionGui extends PagedSimpleGui {
         if (packet != null) {
             this.entity.getServer().getPlayerManager().sendToAll(packet);
         }
-    }
-
-    public static SelectionGui createGui(PaintingEntity entity, ServerPlayerEntity player) {
-        List<PaintingVariant> motives1 = Registries.PAINTING_VARIANT.stream().filter(motive -> EasyPainter.canPaintingAttach(entity, motive)).sorted(Comparator.comparingInt(o -> o.getHeight() * o.getWidth())).toList();
-        List<CustomMotivesManager.CustomMotive> motives2 = EasyPainter.customMotivesManager.getMotives().values().stream().filter(motive -> EasyPainter.canPaintingAttach(entity, motive)).sorted(Comparator.comparingInt(o -> o.getHeight() * o.getWidth())).toList();
-        List<PaintingVariant> motives = Stream.concat(motives1.stream(), motives2.stream()).toList();
-        return new SelectionGui(entity, motives, player);
     }
 }

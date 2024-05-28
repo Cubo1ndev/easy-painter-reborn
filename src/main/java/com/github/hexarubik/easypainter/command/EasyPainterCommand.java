@@ -1,9 +1,9 @@
-package io.github.aws404.easypainter.command;
+package com.github.hexarubik.easypainter.command;
 
+import com.github.hexarubik.easypainter.custom.MotiveCacheState;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import io.github.aws404.easypainter.custom.MotiveCacheState;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.server.command.CommandManager;
@@ -23,24 +23,24 @@ public class EasyPainterCommand {
         source.register(CommandManager.literal("easy_painter")
                 .requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(3))
                 .then(CommandManager.literal("clearcache")
-                    .executes(context -> {
-                        EasyPainterCommand.checkPrepared();
+                        .executes(context -> {
+                            EasyPainterCommand.checkPrepared();
 
-                        context.getSource().getServer().save(false, true, true);
-                        context.getSource().getServer().getPlayerManager().saveAllPlayerData();
-                        context.getSource().getServer().stop(false);
+                            context.getSource().getServer().save(false, true, true);
+                            context.getSource().getServer().getPlayerManager().saveAllPlayerData();
+                            context.getSource().getServer().stop(false);
 
-                        PersistentStateManager manager = context.getSource().getServer().getOverworld().getPersistentStateManager();
-                        MotiveCacheState cache = MotiveCacheState.getOrCreate(manager);
+                            PersistentStateManager manager = context.getSource().getServer().getOverworld().getPersistentStateManager();
+                            MotiveCacheState cache = MotiveCacheState.getOrCreate(manager);
 
-                        for (Identifier key : cache.getKeys()) {
-                            cache.removeEntry(manager, key);
-                        }
+                            for (Identifier key : cache.getKeys()) {
+                                cache.removeEntry(manager, key);
+                            }
 
-                        manager.save();
+                            manager.save();
 
-                        return 1;
-                    })
+                            return 1;
+                        })
                 )
         );
     }

@@ -1,7 +1,7 @@
-package io.github.aws404.easypainter;
+package com.github.hexarubik.easypainter;
 
-import io.github.aws404.easypainter.custom.CustomFrameEntity;
-import io.github.aws404.easypainter.custom.CustomMotivesManager;
+import com.github.hexarubik.easypainter.custom.CustomFrameEntity;
+import com.github.hexarubik.easypainter.custom.CustomMotivesManager;
 
 public interface PaintingEntityAccessor {
     CustomMotivesManager.CustomMotive easy_painter_master$getCustomVariant();

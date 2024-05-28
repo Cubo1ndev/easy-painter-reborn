@@ -1,7 +1,7 @@
-package io.github.aws404.easypainter.custom;
+package com.github.hexarubik.easypainter.custom;
 
+import com.github.hexarubik.easypainter.EasyPainter;
 import com.google.gson.Gson;
-import io.github.aws404.easypainter.EasyPainter;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.MapIdComponent;
 import net.minecraft.entity.decoration.painting.PaintingVariant;
@@ -24,30 +24,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class CustomMotivesManager {
 
     private static final Gson GSON = new Gson();
-    private static HashMap<Identifier, CustomMotive> motives = new HashMap<>();
+    private static final HashMap<Identifier, CustomMotive> motives = new HashMap<>();
 
     private final PersistentStateManager stateManager;
 
     public CustomMotivesManager(PersistentStateManager stateManager) {
         this.stateManager = stateManager;
-    }
-
-    public void reload(World world, ResourceManager manager) {
-        MotiveCacheState paintingStorage = MotiveCacheState.getOrCreate(this.stateManager);
-
-        Map<Identifier, Resource> paintings =  manager.findResources("painting", s -> true);
-        Set<Identifier> keySet = paintings.keySet();
-
-        AtomicInteger id = new AtomicInteger();
-        keySet.stream().filter(identifier -> identifier.getPath().contains(".json")).forEach(identifier -> {
-            MotiveCacheState.Entry motiveCache = paintingStorage.getOrCreateEntry(world, identifier, GSON, manager, this.stateManager);
-            CustomMotivesManager.registerOrReplace(motiveCache.getId(), new CustomMotive(motiveCache));
-            id.incrementAndGet();
-        });
-
-        this.stateManager.save();
-
-        EasyPainter.LOGGER.info("Loaded {} painting motives! ({} custom motives)", Registries.PAINTING_VARIANT.getIds().size(), id.get());
     }
 
     private static void registerOrReplace(Identifier id, CustomMotive motive) {
@@ -60,6 +42,24 @@ public class CustomMotivesManager {
 
         motives.put(id, motive);
         //Registry.register(Registries.PAINTING_VARIANT, id, motive);
+    }
+
+    public void reload(World world, ResourceManager manager) {
+        MotiveCacheState paintingStorage = MotiveCacheState.getOrCreate(this.stateManager);
+
+        Map<Identifier, Resource> paintings = manager.findResources("painting", s -> true);
+        Set<Identifier> keySet = paintings.keySet();
+
+        AtomicInteger id = new AtomicInteger();
+        keySet.stream().filter(identifier -> identifier.getPath().contains(".json")).forEach(identifier -> {
+            MotiveCacheState.Entry motiveCache = paintingStorage.getOrCreateEntry(world, identifier, GSON, manager, this.stateManager);
+            CustomMotivesManager.registerOrReplace(motiveCache.getId(), new CustomMotive(motiveCache));
+            id.incrementAndGet();
+        });
+
+        this.stateManager.save();
+
+        EasyPainter.LOGGER.info("Loaded {} painting motives! ({} custom motives)", Registries.PAINTING_VARIANT.getIds().size(), id.get());
     }
 
     public HashMap<Identifier, CustomMotive> getMotives() {

@@ -1,26 +1,21 @@
 {
-	"item.easy_painter.painting.set": " (Set: %s)",
-
-	"message.easy_painter.painting_cant_fit": "That painting can't fit here!",
-
-	"screen.easy_painter.title": "Easy Painter",
-	"screen.easy_painter.bullet": "- ",
-	"screen.easy_painter.size": "Size: %s",
-	"screen.easy_painter.size.data": "%sx%s",
-	"screen.easy_painter.currently_selected": "Currently Selected",
-
-	"command.easy_painter.clearcache.not_prepared": "Are you sure you want to clear the painting cache? This will stop the server so the painting cache can be cleared. To confirm, run the command again.",
-
-	"screen.easy_painter.previous_page": "Previous Page",
-	"screen.easy_painter.next_page": "Next Page",
-
-	"screen.easy_painter.page_1": "Page 1",
-	"screen.easy_painter.page_2": "Page 2",
-	"screen.easy_painter.page_3": "Page 3",
-	"screen.easy_painter.page_4": "Page 4",
-	"screen.easy_painter.page_5": "Page 5",
-	"screen.easy_painter.page_6": "Page 6",
-	"screen.easy_painter.page_7": "Page 7",
-	"screen.easy_painter.page_8": "Page 8",
-	"screen.easy_painter.page_9": "Page 9"
+  "item.easy_painter.painting.set": " (Set: %s)",
+  "message.easy_painter.painting_cant_fit": "That painting can't fit here!",
+  "screen.easy_painter.title": "Easy Painter",
+  "screen.easy_painter.bullet": "- ",
+  "screen.easy_painter.size": "Size: %s",
+  "screen.easy_painter.size.data": "%sx%s",
+  "screen.easy_painter.currently_selected": "Currently Selected",
+  "command.easy_painter.clearcache.not_prepared": "Are you sure you want to clear the painting cache? This will stop the server so the painting cache can be cleared. To confirm, run the command again.",
+  "screen.easy_painter.previous_page": "Previous Page",
+  "screen.easy_painter.next_page": "Next Page",
+  "screen.easy_painter.page_1": "Page 1",
+  "screen.easy_painter.page_2": "Page 2",
+  "screen.easy_painter.page_3": "Page 3",
+  "screen.easy_painter.page_4": "Page 4",
+  "screen.easy_painter.page_5": "Page 5",
+  "screen.easy_painter.page_6": "Page 6",
+  "screen.easy_painter.page_7": "Page 7",
+  "screen.easy_painter.page_8": "Page 8",
+  "screen.easy_painter.page_9": "Page 9"
 }

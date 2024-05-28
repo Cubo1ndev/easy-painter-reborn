@@ -1,9 +1,9 @@
-package io.github.aws404.easypainter.custom;
+package com.github.hexarubik.easypainter.custom;
 
+import com.github.hexarubik.easypainter.EasyPainter;
+import com.github.hexarubik.easypainter.mixin.ItemFrameEntityAccessor;
 import eu.pb4.polymer.core.api.entity.PolymerEntity;
-import io.github.aws404.easypainter.EasyPainter;
-import io.github.aws404.easypainter.PaintingEntityAccessor;
-import io.github.aws404.easypainter.mixin.ItemFrameEntityAccessor;
+import com.github.hexarubik.easypainter.PaintingEntityAccessor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;

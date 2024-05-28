@@ -1,10 +1,9 @@
-package io.github.aws404.easypainter.mixin;
+package com.github.hexarubik.easypainter.mixin;
 
-import io.github.aws404.easypainter.EasyPainter;
-import io.github.aws404.easypainter.SelectionGui;
+import com.github.hexarubik.easypainter.EasyPainter;
+import com.github.hexarubik.easypainter.SelectionGui;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.decoration.AbstractDecorationEntity;
 import net.minecraft.entity.decoration.GlowItemFrameEntity;
@@ -39,7 +38,9 @@ public abstract class DecorationItemMixin extends Item {
 
     //@Shadow protected abstract void canPlaceOn();
 
-    @Shadow @Final private EntityType<? extends AbstractDecorationEntity> entityType;
+    @Shadow
+    @Final
+    private EntityType<? extends AbstractDecorationEntity> entityType;
 
     public DecorationItemMixin(Settings settings) {
         super(settings);
@@ -51,6 +52,8 @@ public abstract class DecorationItemMixin extends Item {
 
         MutableText text = (MutableText) super.getName(stack);
         NbtComponent entityComponent = stack.get(DataComponentTypes.ENTITY_DATA);
+        if (entityComponent == null) return this.getName();
+
         String str = entityComponent.copyNbt().getString("custom_variant");
         Identifier current = Identifier.tryParse(str);
         text.append(Text.translatable("item.easy_painter.painting.set", EasyPainter.getPaintingDisplayName(current).formatted(Formatting.ITALIC)));
@@ -65,16 +68,15 @@ public abstract class DecorationItemMixin extends Item {
             Objects.requireNonNull(stack.get(DataComponentTypes.CUSTOM_DATA)).getNbt().putBoolean("EntityTag", false);
         } else if (stack.get(DataComponentTypes.CUSTOM_DATA) != null && Objects.requireNonNull(stack.get(DataComponentTypes.CUSTOM_DATA)).getNbt().getBoolean("EntityTag")) {
             NbtComponent nbtComponent = stack.get(DataComponentTypes.ENTITY_DATA);
-            Identifier current = Identifier.tryParse(nbtComponent.copyNbt().getString("Motive"));
-            int newRaw = Registries.PAINTING_VARIANT.getRawId(Registries.PAINTING_VARIANT.get(current)) + 1;
-            if (newRaw >= Registries.PAINTING_VARIANT.getIds().size()) {
-                newRaw = 0;
+            if (nbtComponent != null) {
+                Identifier current = Identifier.tryParse(nbtComponent.copyNbt().getString("Motive"));
+                int newRaw = Registries.PAINTING_VARIANT.getRawId(Registries.PAINTING_VARIANT.get(current)) + 1;
+                if (newRaw >= Registries.PAINTING_VARIANT.getIds().size()) {
+                    newRaw = 0;
+                }
+                nbtComponent.getNbt().putString("Motive", Registries.PAINTING_VARIANT.getId(Registries.PAINTING_VARIANT.get(newRaw)).toString());
+                stack.set(DataComponentTypes.ENTITY_DATA, nbtComponent);
             }
-            nbtComponent.getNbt().putString("Motive", Registries.PAINTING_VARIANT.getId(Registries.PAINTING_VARIANT.get(newRaw)).toString());
-            stack.set(DataComponentTypes.ENTITY_DATA, nbtComponent);
-        } else {
-            //NbtCompound entityTag = Objects.requireNonNull(stack.get(DataComponentTypes.CUSTOM_DATA)).getNbt();
-            //entityTag.putString("Motive", Registries.PAINTING_VARIANT.getId(Registries.PAINTING_VARIANT.get(PaintingVariants.ALBAN.getRegistry())).toString());
         }
 
         if (!world.isClient) {
@@ -117,7 +119,7 @@ public abstract class DecorationItemMixin extends Item {
             if (abstractDecorationEntity.canStayAttached()) {
                 if (!world.isClient) {
                     abstractDecorationEntity.onPlace();
-                    world.emitGameEvent((Entity)playerEntity, GameEvent.ENTITY_PLACE, abstractDecorationEntity.getPos());
+                    world.emitGameEvent(playerEntity, GameEvent.ENTITY_PLACE, abstractDecorationEntity.getPos());
                     world.spawnEntity(abstractDecorationEntity);
                 }
                 itemStack.decrement(1);
@@ -148,7 +150,7 @@ public abstract class DecorationItemMixin extends Item {
 
             if (paintingEntity.canStayAttached()) {
                 if (!world.isClient) {
-                    ((AbstractDecorationEntity)paintingEntity).onPlace();
+                    ((AbstractDecorationEntity) paintingEntity).onPlace();
                     world.emitGameEvent(playerEntity, GameEvent.ENTITY_PLACE, blockPos);
                     world.spawnEntity(paintingEntity);
                 }

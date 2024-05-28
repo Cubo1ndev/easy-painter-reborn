@@ -1,16 +1,16 @@
-package io.github.aws404.easypainter;
+package com.github.hexarubik.easypainter;
 
 import eu.pb4.polymer.core.api.entity.PolymerEntityUtils;
-import io.github.aws404.easypainter.command.EasyPainterCommand;
-import io.github.aws404.easypainter.custom.CustomFrameEntity;
-import io.github.aws404.easypainter.custom.CustomMotivesManager;
+import com.github.hexarubik.easypainter.command.EasyPainterCommand;
+import com.github.hexarubik.easypainter.custom.CustomFrameEntity;
+import com.github.hexarubik.easypainter.custom.CustomMotivesManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.decoration.painting.PaintingEntity;
@@ -35,39 +35,20 @@ import org.apache.logging.log4j.Logger;
 public class EasyPainter implements ModInitializer {
     public static final Logger LOGGER = LogManager.getLogger();
 
-	public static final TagKey<Block> PAINTING_IGNORED = TagKey.of(RegistryKeys.BLOCK, new Identifier("easy_painter:painting_ignored"));
-	public static final TagKey<Block> CANNOT_SUPPORT_PAINTING = TagKey.of(RegistryKeys.BLOCK, new Identifier("easy_painter:cannot_support_painting"));
-	//public static final TagRegistration<EntityType<?>> PAINTING_INTERACT = TagRegTistry.entityType(new Identifier("easy_painter:painting_interact"));
-	//public static final EntityType<CustomFrameEntity> CUSTOM_FRAME_ENTITY = registerEntity(CustomFrameEntity::new);
-    //public static final PaintingItem PAINTING_ITEM_OVERRIDE = Registry.register(Registries.ITEM, Registries.ITEM.getId(Items.PAINTING), new PaintingItem(new Item.Settings()));
+    public static final TagKey<Block> PAINTING_IGNORED = TagKey.of(RegistryKeys.BLOCK, new Identifier("easy_painter:painting_ignored"));
+    public static final TagKey<Block> CANNOT_SUPPORT_PAINTING = TagKey.of(RegistryKeys.BLOCK, new Identifier("easy_painter:cannot_support_painting"));
+    public static final TagKey<EntityType<?>> PAINTING_INTERACT = TagKey.of(RegistryKeys.ENTITY_TYPE, new Identifier("easy_painter:painting_interact"));
 
-    public static final EntityType<CustomFrameEntity> CUSTOM_ITEM_FRAME_ENTITY_TYPE = Registry.register(Registries.ENTITY_TYPE, new Identifier("easy_painter", "custom_item_frame"), EntityType.Builder.<CustomFrameEntity>create(CustomFrameEntity::new, SpawnGroup.MISC).disableSaving().disableSummon().makeFireImmune().build());
-	public static CustomMotivesManager customMotivesManager;
+    public static final EntityType<CustomFrameEntity> CUSTOM_ITEM_FRAME_ENTITY_TYPE = Registry.register(Registries.ENTITY_TYPE, new Identifier("easy_painter", "custom_item_frame"), EntityType.Builder.<CustomFrameEntity>create(CustomFrameEntity::new, SpawnGroup.MISC).disableSaving().disableSummon().makeFireImmune().dimensions(1, 1).build());
+    public static CustomMotivesManager customMotivesManager;
 
-    private static ServerWorld world;
-
-    @Override
-    public void onInitialize() {
-        LOGGER.info("Starting Easy Painter (Version {})", FabricLoader.getInstance().getModContainer("easy_painter").orElseThrow(() -> new IllegalStateException("initialising unloaded mod")).getMetadata().getVersion().getFriendlyString());
-
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> EasyPainterCommand.register(dispatcher));
-
-        PolymerEntityUtils.registerType(CUSTOM_ITEM_FRAME_ENTITY_TYPE);
-        ServerWorldEvents.LOAD.register((server, world) -> {
-            if (world.getRegistryKey() == World.OVERWORLD) {
-                EasyPainter.world = world;
-                EasyPainter.customMotivesManager = new CustomMotivesManager(world.getPersistentStateManager());
-                reloadSources(server.getResourceManager());
-            }
-        });
-    }
-
-    public static void reloadSources(ResourceManager manager) {
+    public static void reloadSources(ServerWorld world, ResourceManager manager) {
         EasyPainter.customMotivesManager.reload(world, manager);
     }
 
     /**
      * Tests if the painting could fit the supplied motive
+     *
      * @param entity the painting entity
      * @param motive the motive to test
      * @return <code>true</code> if the motive will fit
@@ -84,35 +65,22 @@ public class EasyPainter implements ModInitializer {
         int attachX = (widthBlocks - 1) / -2;
         int attachY = (heightBlocks - 1) / -2;
 
-        BlockPos blockPos = entity.getDecorationBlockPos().offset(entity.getFacing().getOpposite());
-        Direction direction = entity.getFacing().rotateYCounterclockwise();
-
         BlockPos.Mutable mutable = new BlockPos.Mutable();
         for (int x = 0; x < widthBlocks; x++) {
             for (int y = 0; y < heightBlocks; y++) {
                 mutable.set(entity.getDecorationBlockPos()).move(rotated, x + attachX).move(Direction.UP, y + attachY);
                 BlockState inside = entity.getWorld().getBlockState(mutable);
 
-                int m = (x - 1) / -2;
-                int n = (y - 1) / -2;
-                mutable.set(blockPos).move(direction, x + m).move(Direction.UP, y + n);
+                mutable.move(facing.getOpposite());
                 BlockState behind = entity.getWorld().getBlockState(mutable);
+
                 if (!inside.isIn(PAINTING_IGNORED) || behind.isIn(CANNOT_SUPPORT_PAINTING)) {
                     return false;
                 }
             }
         }
 
-        for (Entity element : entity.getWorld().getOtherEntities(entity, getBoundingBox(entity, motive, facing, rotated, widthPixels, heightPixels))) {
-            //noinspection StatementWithEmptyBody
-            if ((element instanceof PaintingEntity) && (element == entity)) {
-            } else if (element instanceof CustomFrameEntity) {
-                if (!((PaintingEntityAccessor) entity).easy_painter_master$isEntityInCustonPaintingFrameList((CustomFrameEntity) element)) {
-                    return false;
-                }
-            }
-        }
-        return true;
+        return entity.getWorld().getOtherEntities(entity, getBoundingBox(entity, motive, facing, rotated, widthPixels, heightPixels), entity1 -> entity1.getType().isIn(PAINTING_INTERACT)).isEmpty();
     }
 
     private static Box getBoundingBox(PaintingEntity entity, PaintingVariant motive, Direction facing, Direction rotated, int widthPixels, int heightPixels) {
@@ -151,12 +119,22 @@ public class EasyPainter implements ModInitializer {
         return i % 32 == 0 ? 0.5D : 0.0D;
     }
 
-    /*private static <T extends Entity> EntityType<T> registerEntity(EntityType.EntityFactory<T> factory, String id) {
-        return Registry.register(
-                Registries.ENTITY_TYPE,
-                "easy_painter:" + id,
-                EntityType.Builder.create(factory, SpawnGroup.MISC).disableSaving().disableSummon().makeFireImmune().build()
-        );
-    }*/
+    @Override
+    public void onInitialize() {
+        LOGGER.info("Starting Easy Painter (Version {})", FabricLoader.getInstance().getModContainer("easy_painter").orElseThrow(() -> new IllegalStateException("initialising unloaded mod")).getMetadata().getVersion().getFriendlyString());
 
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> EasyPainterCommand.register(dispatcher));
+
+        PolymerEntityUtils.registerType(CUSTOM_ITEM_FRAME_ENTITY_TYPE);
+        ServerWorldEvents.LOAD.register((server, world) -> {
+            if (world.getRegistryKey() == World.OVERWORLD) {
+                EasyPainter.customMotivesManager = new CustomMotivesManager(world.getPersistentStateManager());
+                reloadSources(world, server.getResourceManager());
+            }
+        });
+
+        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resourceManager, success) -> {
+            EasyPainter.reloadSources(server.getWorld(World.OVERWORLD), resourceManager);
+        });
+    }
 }

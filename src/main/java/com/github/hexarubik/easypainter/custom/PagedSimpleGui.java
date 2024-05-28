@@ -1,4 +1,4 @@
-package io.github.aws404.easypainter.custom;
+package com.github.hexarubik.easypainter.custom;
 
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.elements.GuiElementBuilderInterface;
@@ -17,12 +17,10 @@ import java.util.List;
 
 public class PagedSimpleGui extends SimpleGui {
     private final List<GuiElementInterface> slots;
-    private int page = 0;
-
     private final int maxItemsPerPage = 9 * 5;
-
     private final GuiElementInterface previousPage;
     private final GuiElementInterface nextPage;
+    private int page = 0;
 
     /**
      * Constructs a new simple container gui for the supplied player.

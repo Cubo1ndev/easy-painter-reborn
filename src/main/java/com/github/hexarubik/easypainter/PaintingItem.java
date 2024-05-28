@@ -1,4 +1,4 @@
-package io.github.aws404.easypainter;
+package com.github.hexarubik.easypainter;
 
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
@@ -86,7 +86,7 @@ public class PaintingItem extends DecorationItem {
 
             if (paintingEntity.canStayAttached()) {
                 if (!world.isClient) {
-                    ((AbstractDecorationEntity)paintingEntity).onPlace();
+                    ((AbstractDecorationEntity) paintingEntity).onPlace();
                     world.emitGameEvent(playerEntity, GameEvent.ENTITY_PLACE, blockPos);
                     world.spawnEntity(paintingEntity);
                 }
