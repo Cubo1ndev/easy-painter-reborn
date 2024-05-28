@@ -22,7 +22,7 @@ import java.util.Objects;
 public class ImageRenderer {
     private static final double[] shadeCoeffs = {0.71, 0.86, 1.0, 0.53};
 
-    public static int renderImageToMap(World world, BufferedImage image, DitherMode mode, PersistentStateManager stateManager) {
+    public static int renderImageToMap(World world, BufferedImage image, DitherMode mode) {
         MapState state = MapState.of((byte) 3, false, World.OVERWORLD);
         ((MapStateAccessor) state).setLocked(true);
 
@@ -61,10 +61,6 @@ public class ImageRenderer {
     private static double[] applyShade(double[] color, int ind) {
         double coeff = shadeCoeffs[ind];
         return new double[]{color[0] * coeff, color[1] * coeff, color[2] * coeff};
-    }
-
-    private static int getNextPaintingId(PersistentStateManager stateManager) {
-        return MotiveCacheState.getOrCreate(stateManager).getNextMapId();
     }
 
     private static Color mapColorToRGBColor(CustomMapColor[] colors, int color) {

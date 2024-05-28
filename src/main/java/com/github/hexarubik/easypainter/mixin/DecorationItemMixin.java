@@ -36,8 +36,6 @@ import java.util.Optional;
 @Mixin(DecorationItem.class)
 public abstract class DecorationItemMixin extends Item {
 
-    //@Shadow protected abstract void canPlaceOn();
-
     @Shadow
     @Final
     private EntityType<? extends AbstractDecorationEntity> entityType;

@@ -131,7 +131,7 @@ public class MotiveCacheState extends PersistentState {
                 for (int bH = 0; bH < blockHeight; bH++) {
                     BufferedImage outputImage = new BufferedImage(128, 128, BufferedImage.TYPE_INT_RGB);
                     outputImage.getGraphics().drawImage(resultingImage, 0, 0, 128, 128, bW * 128, bH * 128, (bW + 1) * 128, (bH + 1) * 128, null);
-                    mapIds[bW][bH] = ImageRenderer.renderImageToMap(world, outputImage, ditherMode, stateManager);
+                    mapIds[bW][bH] = ImageRenderer.renderImageToMap(world, outputImage, ditherMode);
                 }
             }
 

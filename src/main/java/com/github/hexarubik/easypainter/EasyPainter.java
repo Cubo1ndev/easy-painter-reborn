@@ -133,8 +133,6 @@ public class EasyPainter implements ModInitializer {
             }
         });
 
-        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resourceManager, success) -> {
-            EasyPainter.reloadSources(server.getWorld(World.OVERWORLD), resourceManager);
-        });
+        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resourceManager, success) -> EasyPainter.reloadSources(server.getWorld(World.OVERWORLD), resourceManager));
     }
 }

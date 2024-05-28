@@ -76,11 +76,6 @@ public class CustomMotivesManager {
         return keys;
     }
 
-    public MotiveCacheState.Entry getMotiveEntry(World world, Identifier id, ResourceManager manager) {
-        MotiveCacheState paintingStorage = MotiveCacheState.getOrCreate(this.stateManager);
-        return paintingStorage.getOrCreateEntry(world, id, GSON, manager, this.stateManager);
-    }
-
     @Nullable
     public Identifier getMotiveId(CustomMotive motive) {
         return getKeys(motives, motive).stream().toList().getFirst();
